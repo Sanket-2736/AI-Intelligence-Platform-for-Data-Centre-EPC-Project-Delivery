@@ -60,14 +60,11 @@ class ChromaManager:
             chroma_path.mkdir(parents=True, exist_ok=True)
             
             # Configure ChromaDB with persistent storage
-            settings = Settings(
-                chroma_db_impl="duckdb+parquet",
-                persist_directory=str(chroma_path),
-                anonymized_telemetry=False
+            print("CHROMA PATH:", chroma_path)
+            print("RESOLVED PATH:", str(chroma_path))
+            self.client = chromadb.PersistentClient(
+                path=str(chroma_path)
             )
-            
-            # Initialize persistent client
-            self.client = chromadb.Client(settings)
             
             # Initialize embedding function
             self.embedding_function = SentenceTransformerEmbeddingFunction(

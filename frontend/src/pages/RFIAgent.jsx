@@ -65,12 +65,12 @@ export default function RFIAgent() {
     }
   };
 
-  const handleFileSelect = async (files) => {
-    if (files.length === 0) return;
+  const handleFileSelect = async (file) => {
+    if (!file) return;
 
     setIngestingFiles(true);
     try {
-      const response = await rfiApi.ingestBatch(files);
+      const response = await rfiApi.ingestBatch([file]);
       const result = response.data;
 
       // Show ingestion result
@@ -144,9 +144,8 @@ export default function RFIAgent() {
           </label>
           <FileUpload
             accept=".pdf"
-            multiple
+            onUpload={handleFileSelect}
             label="Drop PDFs here or click to upload"
-            onFileSelect={handleFileSelect}
           />
         </div>
 

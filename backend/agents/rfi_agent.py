@@ -91,7 +91,6 @@ class DocumentInfo(BaseModel):
     filename: str
     doc_type: str
     chunks_count: int
-    first_ingested: str
 
 
 # ============================================================================
@@ -556,7 +555,7 @@ async def ingest_single_document(
 @router.post("/ingest/batch", response_model=BatchIngestionResponse, tags=["RFI Agent - Ingestion"])
 async def ingest_batch_documents(
     files: List[UploadFile] = File(...),
-    doc_types: List[str] = Form(...),
+    doc_types: List[str] = Form(default=[]),
     dates: List[str] = Form(default=[]),
     revisions: List[str] = Form(default=[])
 ) -> BatchIngestionResponse:
@@ -565,7 +564,7 @@ async def ingest_batch_documents(
     
     Args:
         files: List of PDF files
-        doc_types: List of document types (must match files length)
+        doc_types: Optional list of document types (default: "document" for each file)
         dates: Optional list of dates
         revisions: Optional list of revisions
         
@@ -573,8 +572,19 @@ async def ingest_batch_documents(
         Batch ingestion result
     """
     try:
+        logger.info(f"POST /ingest/batch called with {len(files)} files")
+        logger.debug(f"Files: {[f.filename for f in files]}")
+        logger.debug(f"Doc types provided: {len(doc_types)}, Values: {doc_types}")
+        
+        # Use default doc_type if not provided
+        if not doc_types or len(doc_types) == 0:
+            logger.info(f"No doc_types provided, using default 'document' for {len(files)} files")
+            doc_types = ["document"] * len(files)
+        
         if len(files) != len(doc_types):
-            raise HTTPException(status_code=400, detail="Files and doc_types length mismatch")
+            error_msg = f"Files ({len(files)}) and doc_types ({len(doc_types)}) length mismatch"
+            logger.error(error_msg)
+            raise HTTPException(status_code=400, detail=error_msg)
         
         file_list = []
         temp_files = []
@@ -586,6 +596,7 @@ async def ingest_batch_documents(
                     content = await file.read()
                     tmp.write(content)
                     temp_files.append(tmp.name)
+                    logger.debug(f"File {i+1}: {file.filename} → {tmp.name}")
                     
                     file_list.append({
                         'path': tmp.name,
@@ -595,8 +606,10 @@ async def ingest_batch_documents(
                         'revision': revisions[i] if i < len(revisions) else 'v1'
                     })
             
+            logger.info(f"Prepared {len(file_list)} files for ingestion")
             # Ingest batch
             result = ingest_multiple_documents(file_list)
+            logger.info(f"Batch ingestion successful: {result}")
             
             return BatchIngestionResponse(**result)
             
@@ -608,7 +621,8 @@ async def ingest_batch_documents(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error in batch ingest endpoint: {str(e)}")
+        logger.exception(f"Error in batch ingest endpoint: {str(e)}")
+        logger.error(f"Exception type: {type(e).__name__}")
         raise HTTPException(status_code=400, detail=str(e))
 
 
@@ -651,11 +665,18 @@ async def list_documents() -> List[DocumentInfo]:
         List of document information
     """
     try:
+        logger.info("GET /documents endpoint called")
         docs = get_document_list()
-        return [DocumentInfo(**doc) for doc in docs]
+        logger.info(f"Retrieved {len(docs)} documents from database")
+        logger.debug(f"Document list before validation: {docs}")
+        
+        validated_docs = [DocumentInfo(**doc) for doc in docs]
+        logger.info(f"Successfully validated and returned {len(validated_docs)} documents")
+        return validated_docs
         
     except Exception as e:
-        logger.error(f"Error in documents endpoint: {str(e)}")
+        logger.exception(f"Error in documents endpoint: {str(e)}")
+        logger.error(f"Exception type: {type(e).__name__}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

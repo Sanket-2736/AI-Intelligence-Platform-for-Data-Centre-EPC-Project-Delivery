@@ -25,7 +25,7 @@ class CerebrasClient:
         """Initialize Cerebras client."""
         try:
             self.client = Cerebras(api_key=config.CEREBRAS_API_KEY)
-            self.model = "llama-3.3-70b"
+            self.model = "gpt-oss-120b"
             
             # Usage tracking
             self.total_calls = 0
@@ -73,7 +73,7 @@ class CerebrasClient:
             try:
                 start_time = time.time()
                 
-                response = self.client.messages.create(
+                response = self.client.chat.completions.create(
                     model=self.model,
                     messages=[
                         {"role": "system", "content": system_prompt},
@@ -275,7 +275,7 @@ class CerebrasClient:
             start_time = time.time()
             tokens_streamed = 0
             
-            stream = self.client.messages.create(
+            stream = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
                     {"role": "system", "content": system_prompt},
