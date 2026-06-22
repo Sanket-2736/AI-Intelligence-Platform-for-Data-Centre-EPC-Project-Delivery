@@ -1,8 +1,6 @@
 """
 RFI Intelligence Agent module.
-Handles Request For Information (RFI) processing using RAG (Retrieval-Augmented Generation).
-Ingests project documents, performs semantic search, and generates answers using Cerebras LLM.
-Production-quality with comprehensive error handling and logging.
+Handles Request For Information (RFI) processing using RAG.
 """
 
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
@@ -574,17 +572,21 @@ def answer_question(
         else:
             confidence = "LOW"
         
-        processing_time_ms = (time.time() - start_time) * 1000
+        processing_time_ms = int((time.time() - start_time) * 1000)
         
-        logger.info(f"RFI answered in {processing_time_ms:.0f}ms with confidence: {confidence}")
+        logger.info(f"RFI answered in {processing_time_ms}ms with confidence: {confidence}")
+        
+        # Convert Pydantic objects to dicts for JSON serialization
+        citations_dict = [c.dict() for c in citations]
+        past_rfis_dict = [p.dict() for p in past_rfis]
         
         return {
             'question': question,
             'answer': answer,
-            'citations': citations,
-            'similar_past_rfis': past_rfis,
+            'citations': citations_dict,
+            'similar_past_rfis': past_rfis_dict,
             'sources_retrieved': sources_retrieved,
-            'processing_time_ms': round(processing_time_ms, 0),
+            'processing_time_ms': processing_time_ms,
             'answer_confidence': confidence,
             'success': True,
             'error': None
@@ -592,14 +594,15 @@ def answer_question(
         
     except Exception as e:
         error_msg = f"Error answering question: {str(e)}"
-        logger.error(error_msg)
+        logger.error(error_msg, exc_info=True)
+        processing_time_ms = int((time.time() - start_time) * 1000)
         return {
             'question': question,
             'answer': '',
             'citations': [],
             'similar_past_rfis': [],
             'sources_retrieved': 0,
-            'processing_time_ms': round((time.time() - start_time) * 1000, 0),
+            'processing_time_ms': processing_time_ms,
             'answer_confidence': 'LOW',
             'success': False,
             'error': error_msg

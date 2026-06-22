@@ -1,8 +1,6 @@
 """
 Cerebras Client module.
 Manages LLM calls to Cerebras llama-3.3-70b model for structured analysis.
-Handles prompt formatting, response parsing, and error handling with retries.
-Production-quality with comprehensive logging and token tracking.
 """
 
 import json

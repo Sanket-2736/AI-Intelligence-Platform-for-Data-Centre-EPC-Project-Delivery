@@ -1,8 +1,6 @@
 """
 Specification & Quality Compliance Agent module.
-Analyzes vendor submittals against master specifications, identifies non-conformances,
-and recommends corrective actions using Cerebras LLM.
-Production-quality with comprehensive error handling and Supabase integration.
+Analyzes vendor submittals against master specifications and identifies non-conformances.
 """
 
 import json
@@ -83,6 +81,51 @@ class NCUpdateRequest(BaseModel):
 # ============================================================================
 # CORE COMPLIANCE FUNCTIONS
 # ============================================================================
+
+
+def normalize_severity(severity_str: str) -> str:
+    """
+    Convert any severity string from LLM to valid enum value.
+    
+    Maps common variations to valid enum values:
+    'critical', 'major', 'minor', 'informational'
+    """
+    if not severity_str:
+        return 'minor'
+    
+    severity = severity_str.lower().strip()
+    
+    # Map common variations to valid enum values
+    severity_mapping = {
+        'critical': 'critical',
+        'crit': 'critical',
+        'major': 'major',
+        'maj': 'major',
+        'minor': 'minor',
+        'min': 'minor',
+        'warning': 'major',
+        'warn': 'major',
+        'error': 'critical',
+        'err': 'critical',
+        'info': 'informational',
+        'information': 'informational',
+        'note': 'informational',
+        'observation': 'informational',
+        'comment': 'informational',
+        'remark': 'minor',
+    }
+    
+    # Direct match
+    if severity in severity_mapping:
+        return severity_mapping[severity]
+    
+    # Partial match - check if severity contains any key
+    for key, value in severity_mapping.items():
+        if key in severity or severity in key:
+            return value
+    
+    # Default fallback
+    return 'minor'
 
 
 def check_submittal_against_spec(
@@ -232,8 +275,16 @@ Please perform a detailed compliance analysis comparing the submittal to the spe
         logger.info(
             f"Compliance check complete: {result.get('overall_status', 'UNKNOWN')}, "
             f"score: {result.get('compliance_score', 0)}, "
-            f"findings: {result.get('total_findings', 0)}"
+                        f"findings: {result.get('total_findings', 0)}"
         )
+        
+        # Normalize all severity values in findings using the module-level function
+        normalized_findings = []
+        for finding in result.get('findings', []):
+            normalized_finding = dict(finding)
+            if 'severity' in normalized_finding:
+                normalized_finding['severity'] = normalize_severity(str(normalized_finding['severity']))
+            normalized_findings.append(normalized_finding)
         
         return {
             'summary': result.get('summary', ''),
@@ -241,11 +292,12 @@ Please perform a detailed compliance analysis comparing the submittal to the spe
             'compliance_score': result.get('compliance_score', 0),
             'total_findings': result.get('total_findings', 0),
             'critical_issues': critical_count,
-            'findings': result.get('findings', []),
+            'findings': normalized_findings,
             'processing_time_ms': round(processing_time_ms, 0),
             'success': True,
             'error': None
         }
+
         
     except Exception as e:
         error_msg = f"Compliance check error: {str(e)}"
@@ -367,13 +419,21 @@ Analyze this submittal section for compliance with the specification clauses abo
         
         processing_time_ms = (time.time() - start_time) * 1000
         
+        # Normalize findings: convert severity to lowercase
+        normalized_findings = []
+        for finding in all_findings:
+            normalized_finding = dict(finding)
+            if 'severity' in normalized_finding:
+                normalized_finding['severity'] = normalized_finding['severity'].lower()
+            normalized_findings.append(normalized_finding)
+        
         return {
             'summary': f'RAG-based analysis: {overall_status}',
             'overall_status': overall_status,
             'compliance_score': int(avg_score),
-            'total_findings': len(all_findings),
+            'total_findings': len(normalized_findings),
             'critical_issues': critical_count,
-            'findings': all_findings,
+            'findings': normalized_findings,
             'processing_time_ms': round(processing_time_ms, 0),
             'success': True,
             'error': None

@@ -1,22 +1,8 @@
 """
 Commissioning QA Copilot Agent module.
 
-Expert system for data centre commissioning test generation, execution tracking,
-and ITP (Inspection & Test Plan) documentation. Integrates with:
-- Cerebras LLM for AI-driven test procedure generation
-- ChromaDB RAG for TIA-942, Uptime Institute standards
-- ReportLab for professional PDF ITP generation
-- Supabase for persistent commissioning records
-
-Key capabilities:
-- Ingest TIA-942, Uptime Institute Tier specs as RAG collections
-- Generate detailed, step-by-step test procedures from standards
-- Standard test library with 20+ ready-to-use procedures
-- Log test results with automatic NC generation for failures
-- Generate professional A4 PDF ITPs with pass rates and signatures
-- Real-time commissioning dashboard with system-level tracking
-
-Production-quality with full error handling, comprehensive logging, and type safety.
+Handles commissioning test generation, execution tracking,
+and ITP (Inspection & Test Plan) documentation.
 """
 
 import json
@@ -419,7 +405,7 @@ def generate_test_procedure(
             collection_name=COLLECTION_COMMISSIONING,
             query_text=query_text,
             n_results=4,
-            where_filter={"tier_level": tier}  # Optional: filter by tier
+            filters={"tier_level": tier}  # Optional: filter by tier
         )
         
         # Step 2: Build context from retrieved chunks
@@ -732,11 +718,16 @@ def generate_itp_pdf(
         # SUMMARY TABLE
         story.append(Paragraph("Executive Summary", heading_style))
         
+        # Prevent division by zero
+        total = summary.get('total', 0)
+        if total == 0:
+            total = 1  # Avoid division by zero
+        
         summary_data = [
             ['Metric', 'Count', 'Percentage'],
-            ['Passed', str(summary['pass_count']), f"{(summary['pass_count']/summary['total']*100):.1f}%"],
-            ['Failed', str(summary['fail_count']), f"{(summary['fail_count']/summary['total']*100):.1f}%"],
-            ['Conditional', str(summary.get('conditional_count', 0)), f"{(summary.get('conditional_count', 0)/summary['total']*100):.1f}%"],
+            ['Passed', str(summary['pass_count']), f"{(summary['pass_count']/total*100):.1f}%"],
+            ['Failed', str(summary['fail_count']), f"{(summary['fail_count']/total*100):.1f}%"],
+            ['Conditional', str(summary.get('conditional_count', 0)), f"{(summary.get('conditional_count', 0)/total*100):.1f}%"],
         ]
         
         summary_table = Table(summary_data, colWidths=[2*inch, 1.5*inch, 1.5*inch])

@@ -1,8 +1,6 @@
 """
 Predictive Schedule Risk Engine module.
-Analyzes project schedules for risks, identifies critical path issues,
-and predicts delays using predictive analytics and Cerebras insights.
-Production-quality with comprehensive schedule analysis capabilities.
+Analyzes project schedules for risks and identifies critical path issues.
 """
 
 import json

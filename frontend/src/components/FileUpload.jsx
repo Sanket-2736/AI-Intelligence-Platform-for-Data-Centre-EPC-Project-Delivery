@@ -1,6 +1,5 @@
 /**
- * File Upload Component (Premium Design)
- * Reusable file upload handler with modern styling
+ * File Upload Component
  */
 
 import { useState } from 'react';
@@ -10,6 +9,8 @@ export default function FileUpload({ onUpload, accept = '.pdf,.xlsx,.csv' }) {
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  
+  const uniqueId = `file-input-${Math.random().toString(36).substr(2, 9)}`;
 
   const handleDragEnter = (e) => {
     e.preventDefault();
@@ -100,10 +101,10 @@ export default function FileUpload({ onUpload, accept = '.pdf,.xlsx,.csv' }) {
             onChange={handleFileInputChange}
             disabled={isLoading}
             className="hidden"
-            id="file-input"
+            id={uniqueId}
           />
           <label
-            htmlFor="file-input"
+            htmlFor={uniqueId}
             className="inline-block px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg cursor-pointer transition-colors"
           >
             {isLoading ? 'Uploading...' : 'Select Files'}

@@ -64,22 +64,20 @@ export default function RFIAgent() {
       const response = await rfiApi.ingestBatch([file]);
       const result = response.data;
 
-      // Show ingestion result
       setMessages((prev) => [
         ...prev,
         {
           type: 'ai',
-          text: `✓ ${result.total_chunks || 0} chunks indexed from ${result.successful_files || 0} files`,
+          text: `${result.total_chunks || 0} chunks indexed from ${result.successful_files || 0} files`,
         },
       ]);
 
-      // Reload documents
       loadDocuments();
     } catch (error) {
       console.error('Error ingesting files:', error);
       setMessages((prev) => [
         ...prev,
-        { type: 'ai', text: '❌ Failed to ingest documents. Please try again.' },
+        { type: 'ai', text: 'Failed to ingest documents. Please try again.' },
       ]);
     }
   };
@@ -92,28 +90,71 @@ export default function RFIAgent() {
     setInputValue('');
     setMessages((prev) => [...prev, { type: 'user', text: userMessage }]);
     setLoading(true);
+    setResponseTime(null);
 
     const startTime = Date.now();
 
     try {
+      console.log('Sending RFI query:', userMessage);
       const response = await rfiApi.query(userMessage);
+      
+      console.log('Response received:', response);
+      
+      if (!response || !response.data) {
+        throw new Error('Empty response from server');
+      }
+
       const result = response.data;
+      console.log('Response data:', result);
+      console.log('Answer length:', result.answer?.length || 0, 'characters');
 
-      setResponseTime(((Date.now() - startTime) / 1000).toFixed(1));
+      // Validate response has required fields
+      if (!result.answer) {
+        console.warn('No answer in response, result:', result);
+        throw new Error('No answer in response');
+      }
 
-      setMessages((prev) => [
-        ...prev,
-        {
-          type: 'ai',
-          text: result.answer,
-          citations: result.citations || [],
-        },
-      ]);
+      const responseTimeSeconds = ((Date.now() - startTime) / 1000).toFixed(1);
+      console.log('Response time:', responseTimeSeconds);
+      setResponseTime(responseTimeSeconds);
+
+      // Ensure citations is always an array
+      const citations = Array.isArray(result.citations) ? result.citations : [];
+      console.log('Parsed citations:', citations);
+
+      console.log('Adding message to state:', {
+        type: 'ai',
+        text: result.answer.substring(0, 100) + '...',
+        citations: citations,
+      });
+
+      // Add message immediately without rendering delay
+      const newMessage = {
+        type: 'ai',
+        text: result.answer,
+        citations: citations,
+      };
+
+      setMessages((prev) => {
+        const updated = [...prev, newMessage];
+        console.log('Updated messages count:', updated.length);
+        return updated;
+      });
+
+      console.log('Message added to state');
     } catch (error) {
-      console.error('Error querying RFI:', error);
+      console.error('Error querying RFI:', error.message);
+      console.error('Full error:', error);
+      if (error.response?.data) {
+        console.error('Response error data:', error.response.data);
+      }
+      
       setMessages((prev) => [
         ...prev,
-        { type: 'ai', text: '❌ Error querying documents. Please try again.' },
+        { 
+          type: 'ai', 
+          text: `Error: ${error.message || 'Failed to query documents. Please try again.'}` 
+        },
       ]);
     } finally {
       setLoading(false);
@@ -213,8 +254,10 @@ export default function RFIAgent() {
                   </div>
                 ) : (
                   <div className="flex justify-start mb-3">
-                    <div className="bg-[#1A1A24] border border-white/5 text-slate-200 rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm max-w-[85%]">
-                      <MarkdownRenderer text={msg.text} />
+                    <div className="bg-[#1A1A24] border border-white/5 text-slate-200 rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm overflow-hidden">
+                      <div className="overflow-auto max-h-[400px]">
+                        <MarkdownRenderer text={msg.text} />
+                      </div>
                       {Array.isArray(msg.citations) && msg.citations.length > 0 && (
                         <div className="mt-3 space-y-1.5 border-t border-white/5 pt-2.5">
                           {msg.citations.map((citation, cidx) => (

@@ -1,11 +1,5 @@
 /**
  * API Client Configuration
- * 
- * Axios instance with interceptors for:
- * - Request: Add loading state
- * - Response: Global error handling
- * 
- * Exports named API groups for each agent module
  */
 
 import axios from 'axios';
@@ -22,10 +16,7 @@ const client = axios.create({
 
 // Request Interceptor
 client.interceptors.request.use(
-  (config) => {
-    // Can add loading state here if needed
-    return config;
-  },
+  (config) => config,
   (error) => Promise.reject(error)
 );
 
@@ -33,7 +24,6 @@ client.interceptors.request.use(
 client.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Global error handling
     if (error.response?.status === 422) {
       console.error('Validation Error:', error.response.data);
     } else if (error.response?.status === 500) {
@@ -45,9 +35,7 @@ client.interceptors.response.use(
   }
 );
 
-// ============================================================================
 // RFI API
-// ============================================================================
 export const rfiApi = {
   ingestSingle: (file) => {
     const formData = new FormData();
@@ -66,18 +54,22 @@ export const rfiApi = {
   },
   
   query: (question) => client.post('/api/rfi/query', { question }),
-  
   getDocuments: () => client.get('/api/rfi/documents'),
-  
   getHistory: (limit = 10) => client.get(`/api/rfi/history?limit=${limit}`),
 };
 
-// ============================================================================
-// COMPLIANCE API
-// ============================================================================
+// Compliance API
 export const complianceApi = {
-  check: (submittal, spec) => 
-    client.post('/api/compliance/check', { submittal, spec }),
+  check: (submittal, spec, equipmentType = '') => {
+    const formData = new FormData();
+    formData.append('submittal', submittal);
+    formData.append('master_spec', spec);
+    formData.append('equipment_type', equipmentType || 'general');
+    formData.append('project_code', 'PRJ-001');
+    return client.post('/api/compliance/check', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
   
   ingestSpec: (file) => {
     const formData = new FormData();
@@ -88,19 +80,15 @@ export const complianceApi = {
   },
   
   getDashboard: () => client.get('/api/compliance/dashboard'),
-  
   getNCs: (status = null) => {
     const url = status ? `/api/compliance/ncs?status=${status}` : '/api/compliance/ncs';
     return client.get(url);
   },
-  
   closeNC: (ncId, resolution) =>
     client.put(`/api/compliance/nc/${ncId}`, { status: 'closed', resolution }),
 };
 
-// ============================================================================
-// SCHEDULE API
-// ============================================================================
+// Schedule API
 export const scheduleApi = {
   analyse: (file) => {
     const formData = new FormData();
@@ -121,14 +109,11 @@ export const scheduleApi = {
   },
   
   getTrend: () => client.get('/api/schedule/trend'),
-  
   getReport: (projectName = 'Hyperscale DC') =>
     client.get(`/api/schedule/report?project_name=${projectName}`),
 };
 
-// ============================================================================
-// SUPPLY CHAIN API
-// ============================================================================
+// Supply Chain API
 export const supplyChainApi = {
   uploadCSV: (file) => {
     const formData = new FormData();
@@ -140,13 +125,9 @@ export const supplyChainApi = {
   
   addShipment: (shipmentData) =>
     client.post('/api/supply-chain/shipment', shipmentData),
-  
   getMapData: () => client.get('/api/supply-chain/map'),
-  
   getAlerts: () => client.get('/api/supply-chain/alerts'),
-  
   getSummary: () => client.get('/api/supply-chain/summary'),
-  
   getAlternatives: (equipmentName, currentSupplier) =>
     client.post('/api/supply-chain/alternatives', {
       equipment_name: equipmentName,
@@ -154,9 +135,7 @@ export const supplyChainApi = {
     }),
 };
 
-// ============================================================================
-// COMMISSIONING API
-// ============================================================================
+// Commissioning API
 export const commissioningApi = {
   ingestStandards: (files, standardNames = null) => {
     const formData = new FormData();
@@ -175,12 +154,9 @@ export const commissioningApi = {
       test_name: testName,
       tier,
     }),
-  
   getLibrary: () => client.get('/api/commissioning/tests/library'),
-  
   logResult: (result) =>
     client.post('/api/commissioning/results/log', result),
-  
   downloadITP: (projectName, company, person = null) => {
     const params = new URLSearchParams({
       project_name: projectName,
@@ -191,13 +167,10 @@ export const commissioningApi = {
       responseType: 'blob',
     });
   },
-  
   getDashboard: () => client.get('/api/commissioning/dashboard'),
 };
 
-// ============================================================================
-// DASHBOARD API
-// ============================================================================
+// Dashboard API
 export const dashboardApi = {
   getSummary: () => client.get('/api/dashboard/summary'),
 };

@@ -1,13 +1,14 @@
 /**
- * Markdown Renderer Component
+ * Markdown Renderer Component - Optimized for Large Content
  * 
- * Converts markdown formatting in text to styled JSX:
+ * Converts markdown formatting in text to styled JSX using regex replace:
  * - **text** → <strong>text</strong> (bold)
  * - *text* → <em>text</em> (italic)
  * - `code` → <code>code</code> (inline code)
  * - [text](url) → <a>text</a> (links)
  * 
- * Processes patterns in order: links → bold → italic → code
+ * Uses simple regex replacement instead of token parsing for better performance
+ * with large response bodies. No loop-based parsing = no hanging.
  */
 
 export default function MarkdownRenderer({ text }) {
@@ -15,106 +16,86 @@ export default function MarkdownRenderer({ text }) {
     return <span>{text}</span>;
   }
 
-  // Parse markdown into an array of { type, content }
-  const parseMarkdown = (str) => {
-    const tokens = [];
-    let i = 0;
+  // Simple regex-based replacement: process each pattern once
+  // This avoids tokenization loops that can hang on large content
+  
+  // Process: bold → italic → code → links → split and render
+  let processed = text;
 
-    while (i < str.length) {
-      // Check for link [text](url)
-      const linkMatch = str.slice(i).match(/^\[([^\]]+)\]\(([^)]+)\)/);
-      if (linkMatch) {
-        tokens.push({ type: 'link', text: linkMatch[1], url: linkMatch[2] });
-        i += linkMatch[0].length;
-        continue;
-      }
+  // 1. Handle bold **text** (non-greedy)
+  processed = processed.replace(/\*\*(.+?)\*\*/g, '<BOLD>$1</BOLD>');
 
-      // Check for bold **text**
-      const boldMatch = str.slice(i).match(/^\*\*([^\*]+)\*\*/);
-      if (boldMatch) {
-        tokens.push({ type: 'bold', text: boldMatch[1] });
-        i += boldMatch[0].length;
-        continue;
-      }
+  // 2. Handle italic *text* (but not ** or ***)
+  // Use negative lookbehind/lookahead to avoid matching ** edges
+  processed = processed.replace(/\*([^\*].+?[^\*])\*/g, '<ITALIC>$1</ITALIC>');
 
-      // Check for italic *text* (but not **)
-      const italicMatch = str.slice(i).match(/^\*([^\*]+)\*(?!\*)/);
-      if (italicMatch) {
-        tokens.push({ type: 'italic', text: italicMatch[1] });
-        i += italicMatch[0].length;
-        continue;
-      }
+  // 3. Handle inline code `text`
+  processed = processed.replace(/`([^`]+)`/g, '<CODE>$1</CODE>');
 
-      // Check for code `text`
-      const codeMatch = str.slice(i).match(/^`([^`]+)`/);
-      if (codeMatch) {
-        tokens.push({ type: 'code', text: codeMatch[1] });
-        i += codeMatch[0].length;
-        continue;
-      }
+  // 4. Handle links [text](url)
+  processed = processed.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<LINK|$1|$2</LINK>');
 
-      // Regular text: consume until next special char
-      const nextSpecial = str.slice(i).search(/[\[\*`]/);
-      if (nextSpecial === -1) {
-        tokens.push({ type: 'text', text: str.slice(i) });
-        break;
-      } else {
-        tokens.push({ type: 'text', text: str.slice(i, i + nextSpecial) });
-        i += nextSpecial;
-      }
-    }
-
-    return tokens;
-  };
-
-  const tokens = parseMarkdown(text);
+  // Split by our markers and render
+  const parts = processed.split(/(<BOLD>.*?<\/BOLD>|<ITALIC>.*?<\/ITALIC>|<CODE>.*?<\/CODE>|<LINK\|.*?\<\/LINK>)/);
 
   return (
-    <span className="whitespace-pre-wrap">
-      {tokens.map((token, idx) => {
-        if (token.type === 'bold') {
+    <div className="overflow-x-hidden break-words">
+      {parts.map((part, idx) => {
+        if (!part) return null;
+
+        // Handle bold
+        if (part.startsWith('<BOLD>') && part.endsWith('</BOLD>')) {
+          const content = part.slice(6, -7);
           return (
             <strong key={idx} className="font-semibold text-white">
-              {token.text}
+              {content}
             </strong>
           );
         }
 
-        if (token.type === 'italic') {
+        // Handle italic
+        if (part.startsWith('<ITALIC>') && part.endsWith('</ITALIC>')) {
+          const content = part.slice(8, -9);
           return (
             <em key={idx} className="italic text-slate-300">
-              {token.text}
+              {content}
             </em>
           );
         }
 
-        if (token.type === 'code') {
+        // Handle code
+        if (part.startsWith('<CODE>') && part.endsWith('</CODE>')) {
+          const content = part.slice(6, -7);
           return (
             <code
               key={idx}
               className="bg-[#1A1A24] border border-white/10 px-1.5 py-0.5 rounded text-xs font-mono text-indigo-400"
             >
-              {token.text}
+              {content}
             </code>
           );
         }
 
-        if (token.type === 'link') {
+        // Handle links
+        if (part.startsWith('<LINK|') && part.endsWith('</LINK>')) {
+          const content = part.slice(6, -7);
+          const [linkText, url] = content.split('|');
           return (
             <a
               key={idx}
-              href={token.url}
+              href={url}
               target="_blank"
               rel="noopener noreferrer"
               className="text-indigo-400 hover:text-indigo-300 underline transition-colors"
             >
-              {token.text}
+              {linkText}
             </a>
           );
         }
 
-        return <span key={idx}>{token.text}</span>;
+        // Plain text
+        return <span key={idx}>{part}</span>;
       })}
-    </span>
+    </div>
   );
 }

@@ -41,14 +41,19 @@ export default function ComplianceAgent() {
       return;
     }
 
+    if (!equipmentType.trim()) {
+      alert('Please enter equipment type');
+      return;
+    }
+
     setLoading(true);
     try {
-      const response = await complianceApi.check(submittalFile, specFile);
+      const response = await complianceApi.check(submittalFile, specFile, equipmentType);
       setResults(response.data);
       loadDashboard();
     } catch (error) {
       console.error('Error running compliance check:', error);
-      alert('Error running compliance check');
+      alert('Error running compliance check: ' + (error.response?.data?.detail || error.message));
     } finally {
       setLoading(false);
     }
@@ -125,10 +130,26 @@ export default function ComplianceAgent() {
           />
         </div>
 
+        {/* Status message */}
+        {(!specFile || !submittalFile || !equipmentType.trim()) && (
+          <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg">
+            <p className="text-xs text-amber-400">
+              {!specFile && '⚠ Upload specification file'}
+              {specFile && !submittalFile && '⚠ Upload vendor submittal to run check'}
+              {specFile && submittalFile && !equipmentType.trim() && '⚠ Enter equipment type'}
+            </p>
+          </div>
+        )}
+
         <button
           onClick={handleRunCheck}
-          disabled={loading || !specFile || !submittalFile}
-          className="w-full px-6 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:opacity-50 rounded-xl text-white font-medium transition-colors flex items-center justify-center gap-2"
+          disabled={loading || !specFile || !submittalFile || !equipmentType.trim()}
+          className={`w-full px-6 py-3 rounded-xl text-white font-medium transition-colors flex items-center justify-center gap-2 ${
+            loading || !specFile || !submittalFile || !equipmentType.trim()
+              ? 'bg-slate-700 opacity-50 cursor-not-allowed'
+              : 'bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 cursor-pointer'
+          }`}
+          title={!specFile ? 'Upload specification first' : !submittalFile ? 'Upload submittal to enable' : !equipmentType.trim() ? 'Enter equipment type' : 'Run compliance check'}
         >
           {loading ? (
             <>

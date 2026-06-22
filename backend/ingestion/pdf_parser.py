@@ -1,8 +1,6 @@
 """
 PDF Parser module.
-Handles PDF document extraction using PyMuPDF and pdfplumber,
-extracts text and metadata for processing by agents.
-Production-quality with full error handling and type hints.
+Handles PDF extraction using PyMuPDF and pdfplumber.
 """
 
 from typing import List, Dict, Any, Optional
@@ -15,22 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def extract_text_pymupdf(file_path: str) -> Dict[str, Any]:
-    """
-    Extract text from PDF using PyMuPDF (fitz).
-
-    Args:
-        file_path: Path to PDF file
-
-    Returns:
-        {
-            'filename': str,
-            'total_pages': int,
-            'pages': list,
-            'full_text': str,
-            'success': bool,
-            'error': Optional[str]
-        }
-    """
+    """Extract text from PDF using PyMuPDF."""
     try:
         pdf_path = Path(file_path)
 
@@ -47,13 +30,9 @@ def extract_text_pymupdf(file_path: str) -> Dict[str, Any]:
         logger.info(f"Opening PDF: {file_path}")
 
         doc = fitz.open(file_path)
-
         total_pages = len(doc)
 
-        logger.info(
-            f"PDF opened successfully: {pdf_path.name} "
-            f"({total_pages} pages)"
-        )
+        logger.info(f"PDF opened: {pdf_path.name} ({total_pages} pages)")
 
         pages = []
         full_text_parts = []
@@ -61,31 +40,20 @@ def extract_text_pymupdf(file_path: str) -> Dict[str, Any]:
         for page_num in range(total_pages):
             try:
                 page = doc.load_page(page_num)
-
                 text = page.get_text("text") or ""
-
                 rect = page.rect
 
                 pages.append({
                     "page": page_num + 1,
                     "text": text,
                     "char_count": len(text),
-                    "bbox": (
-                        rect.x0,
-                        rect.y0,
-                        rect.x1,
-                        rect.y1
-                    )
+                    "bbox": (rect.x0, rect.y0, rect.x1, rect.y1)
                 })
 
                 full_text_parts.append(text)
 
             except Exception as page_error:
-                logger.warning(
-                    f"Failed reading page {page_num + 1}: "
-                    f"{page_error}"
-                )
-
+                logger.warning(f"Failed reading page {page_num + 1}: {page_error}")
                 pages.append({
                     "page": page_num + 1,
                     "text": "",
@@ -95,16 +63,11 @@ def extract_text_pymupdf(file_path: str) -> Dict[str, Any]:
                 })
 
         full_text = "\n\n".join(full_text_parts)
-
         extracted_chars = len(full_text)
 
         doc.close()
 
-        logger.info(
-            f"PDF extraction completed. "
-            f"Pages={total_pages}, "
-            f"Chars={extracted_chars}"
-        )
+        logger.info(f"Extraction completed: {total_pages} pages, {extracted_chars} chars")
 
         return {
             "filename": pdf_path.name,
@@ -116,9 +79,7 @@ def extract_text_pymupdf(file_path: str) -> Dict[str, Any]:
         }
 
     except Exception as e:
-        logger.exception(
-            f"PDF extraction failed for {file_path}"
-        )
+        logger.exception(f"PDF extraction failed for {file_path}")
 
         return {
             "filename": Path(file_path).name,
@@ -131,22 +92,7 @@ def extract_text_pymupdf(file_path: str) -> Dict[str, Any]:
 
 
 def extract_tables_pdfplumber(file_path: str) -> List[Dict[str, Any]]:
-    """
-    Extract tables from PDF using pdfplumber.
-    
-    Args:
-        file_path: Path to PDF file
-        
-    Returns:
-        List of {
-            'page': int,
-            'table_index': int,
-            'headers': List[str],
-            'data': List[List[str]],
-            'row_count': int,
-            'col_count': int
-        }
-    """
+    """Extract tables from PDF using pdfplumber."""
     try:
         if not Path(file_path).exists():
             logger.warning(f"File not found: {file_path}")
@@ -164,7 +110,6 @@ def extract_tables_pdfplumber(file_path: str) -> List[Dict[str, Any]]:
                             if not table or len(table) == 0:
                                 continue
 
-                            # Convert all cells to strings, handle None
                             headers = [str(cell) if cell is not None else '' for cell in table[0]]
                             data = []
                             
@@ -193,17 +138,7 @@ def extract_tables_pdfplumber(file_path: str) -> List[Dict[str, Any]]:
 
 
 def is_scanned_pdf(file_path: str) -> bool:
-    """
-    Detect if PDF is scanned (image-based) vs text-based.
-    
-    Heuristic: If average characters per page < 100, likely scanned.
-    
-    Args:
-        file_path: Path to PDF file
-        
-    Returns:
-        True if scanned, False if text-based
-    """
+    """Detect if PDF is scanned (image-based) vs text-based."""
     try:
         result = extract_text_pymupdf(file_path)
         
@@ -214,7 +149,7 @@ def is_scanned_pdf(file_path: str) -> bool:
         avg_chars_per_page = total_chars / result['total_pages'] if result['total_pages'] > 0 else 0
 
         is_scanned = avg_chars_per_page < 100
-        logger.info(f"PDF '{result['filename']}': avg {avg_chars_per_page:.1f} chars/page - {'SCANNED' if is_scanned else 'TEXT-BASED'}")
+        logger.info(f"PDF '{result['filename']}': {avg_chars_per_page:.1f} chars/page - {'SCANNED' if is_scanned else 'TEXT-BASED'}")
 
         return is_scanned
 
@@ -224,24 +159,7 @@ def is_scanned_pdf(file_path: str) -> bool:
 
 
 def extract_pdf_metadata(file_path: str) -> Dict[str, Any]:
-    """
-    Extract PDF metadata.
-    
-    Args:
-        file_path: Path to PDF file
-        
-    Returns:
-        {
-            'title': str,
-            'author': str,
-            'creation_date': str,
-            'modification_date': str,
-            'num_pages': int,
-            'producer': str,
-            'creator': str,
-            'error': Optional[str]
-        }
-    """
+    """Extract PDF metadata."""
     try:
         if not Path(file_path).exists():
             return {
@@ -287,18 +205,7 @@ def extract_pdf_metadata(file_path: str) -> Dict[str, Any]:
 
 
 def extract_text_with_ocr_fallback(file_path: str) -> Dict[str, Any]:
-    """
-    Extract text from PDF with OCR fallback warning for scanned documents.
-    
-    Tries PyMuPDF first. If scanned, adds OCR warning flag.
-    Note: Actual OCR via pytesseract would be implemented separately.
-    
-    Args:
-        file_path: Path to PDF file
-        
-    Returns:
-        Same as extract_text_pymupdf with additional 'ocr_warning' field
-    """
+    """Extract text from PDF with OCR fallback warning for scanned documents."""
     try:
         result = extract_text_pymupdf(file_path)
 
@@ -306,13 +213,12 @@ def extract_text_with_ocr_fallback(file_path: str) -> Dict[str, Any]:
             result['ocr_warning'] = None
             return result
 
-        # Check if scanned
         scanned = is_scanned_pdf(file_path)
         
         if scanned:
             result['ocr_warning'] = (
-                "This PDF appears to be scanned (image-based). "
-                "Text extraction is limited. Full OCR via pytesseract would improve accuracy."
+                "This PDF appears to be scanned. Text extraction is limited. "
+                "Full OCR via pytesseract would improve accuracy."
             )
         else:
             result['ocr_warning'] = None

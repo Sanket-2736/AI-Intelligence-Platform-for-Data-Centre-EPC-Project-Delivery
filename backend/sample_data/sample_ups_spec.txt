@@ -1,0 +1,233 @@
+================================================================================
+UNINTERRUPTIBLE POWER SUPPLY (UPS) SYSTEM SPECIFICATION
+Model: PowerGuard Pro 3-Phase 500kVA
+Revision: 3.2
+Date: January 2024
+================================================================================
+
+1. EXECUTIVE SUMMARY
+The PowerGuard Pro 500kVA UPS system is designed for mission-critical industrial 
+and commercial applications requiring high availability and reliability. This 
+specification covers the technical requirements, installation guidelines, and 
+operational parameters for the three-phase UPS system.
+
+2. SYSTEM SPECIFICATIONS
+
+2.1 Power Ratings
+  - Rated Power (UPS Mode): 500 kVA / 400 kW
+  - Rated Power (ECO Mode): 550 kVA / 440 kW
+  - Input Voltage: 380-415V AC (3-phase, 4-wire)
+  - Output Voltage: 380-415V AC (3-phase, 4-wire)
+  - Frequency: 50/60 Hz (auto-sensing)
+  - Input Phase Angle: 120 degrees
+  - Total Harmonic Distortion (THD): < 3%
+
+2.2 Battery System
+  - Technology: Lithium-Ion LiFePO4
+  - Capacity: 300 kWh
+  - Backup Time at Full Load: 45 minutes
+  - Backup Time at 50% Load: 90 minutes
+  - Charging Time: 4 hours (80% capacity), 6 hours (full capacity)
+  - Battery Management System (BMS): Integrated with cell balancing
+  - Operating Temperature Range: 0°C to 40°C
+  - Maximum Operating Altitude: 3000m
+
+2.3 Efficiency Ratings
+  - Round-Trip Efficiency (Battery Mode): 92%
+  - ECO Mode Efficiency: 96%
+  - Double Conversion Efficiency: 94%
+  - Standby Loss: < 2% of rated power
+
+2.4 Environmental Specifications
+  - Operating Temperature: 15°C to 35°C (optimal)
+  - Humidity: 20% to 80% (non-condensing)
+  - Noise Level: 75 dB(A) at 1 meter
+  - Cooling System: Liquid-cooled (glycol-water mixture)
+  - Cooling Capacity: 600 kW
+  - Water Flow Rate: 50 liters/minute
+
+3. PHYSICAL SPECIFICATIONS
+
+3.1 Dimensions and Weight
+  - Cabinet Dimensions: 2.4m (H) x 1.8m (W) x 1.2m (D)
+  - Weight (Empty): 2800 kg
+  - Weight (Fully Loaded): 4500 kg
+  - Footprint: 2.16 m²
+  - Required Floor Loading: 2.08 kg/cm²
+
+3.2 Electrical Connections
+  - Input Connection: 125A @ 400V (3-phase)
+  - Output Connection: 750A @ 400V (3-phase)
+  - Bypass Connection: Direct hardwired (automatic switchover)
+  - Communication: RS-232, RS-485, Ethernet (RJ-45)
+  - Emergency Power-Off (EPO): Dual-channel hardwired
+  - Grounding: Multi-point earthing system
+
+4. OPERATIONAL MODES
+
+4.1 Online Double Conversion
+  - Continuous rectifier-to-inverter conversion
+  - Zero Transfer Time on input failure
+  - Load always powered from inverter
+  - Recommended for sensitive equipment
+
+4.2 ECO Mode (Energy Saving)
+  - Utility power passes directly to load when within tolerance
+  - Automatic switchover to battery within 4ms on failure
+  - Reduces operational cost by 30-40%
+  - Not recommended for precision manufacturing equipment
+
+4.3 Battery Mode
+  - Inverter supplies load from battery
+  - Output regulation: ±2%
+  - Frequency regulation: ±0.1%
+  - Maximum Drain Rate: 500A
+
+5. PROTECTION FEATURES
+
+5.1 Input Protection
+  - Surge suppression: 6kV/10kA
+  - Input isolation transformer: 100 kVA
+  - Over-voltage protection: ±15%
+  - Under-voltage protection: ±15%
+
+5.2 Output Protection
+  - Short-circuit protection: Immediate disconnection
+  - Overload protection: Up to 150% for 60 seconds
+  - Fault isolation: Automatic by-pass activation
+  - Phase failure detection and alarm
+
+5.3 Battery Protection
+  - Over-charge protection: Automatic voltage regulation
+  - Over-discharge protection: Automatic load disconnect at 20% SOC
+  - Temperature monitoring: Per-cell thermal management
+  - Cell fault detection: Immediate isolation of faulty cells
+
+5.4 Thermal Management
+  - Automatic cooling system activation above 30°C
+  - Thermal sensors in all major components
+  - Fan speed modulation based on load and temperature
+  - Automatic shutdown if core temperature exceeds 65°C
+
+6. MONITORING AND DIAGNOSTICS
+
+6.1 Display and Controls
+  - 7-inch color touchscreen display
+  - Real-time power flow visualization
+  - Battery state-of-charge display
+  - Temperature and humidity monitoring
+  - Historical data logging (30 days)
+
+6.2 Remote Monitoring
+  - SNMP v3 protocol support
+  - Cloud-based monitoring portal
+  - Mobile app (iOS/Android)
+  - Email/SMS alerts for critical events
+  - Predictive maintenance notifications
+
+6.3 Data Logging
+  - Event logging: 1000 entries
+  - Parameter sampling: Every 5 minutes
+  - Data retention: 365 days
+  - Export formats: CSV, JSON, PDF
+
+7. MAINTENANCE REQUIREMENTS
+
+7.1 Preventive Maintenance Schedule
+  - Monthly: Visual inspection and display check
+  - Quarterly: Battery voltage verification, cooling system inspection
+  - Semi-Annual: Full system performance test, thermography
+  - Annual: Complete battery capacity test, firmware update check
+  - Triennial: Battery replacement recommended
+
+7.2 Spare Parts Recommended Stock
+  - Battery Management Module: 1 unit
+  - Cooling Pump Assembly: 1 unit
+  - Power Module (Rectifier/Inverter): 1 unit
+  - Control Board: 1 unit
+  - Sensor Assemblies: 5 units
+
+7.3 Service Access Points
+  - Battery compartment: Front access
+  - Cooling system: Top and rear access
+  - Power modules: Slide-out design
+  - Control boards: Easy plug-in replacement
+  - All filters accessible from front panel
+
+8. COMPLIANCE AND CERTIFICATIONS
+
+  - IEC 62040-1-1: Uninterruptible Power Supply (UPS) - General and Safety
+  - IEC 62040-2: UPS Performance
+  - ISO 9001:2015: Quality Management System
+  - CE Marking: European Compliance
+  - RoHS Compliance: Restricted Hazardous Substances
+  - Energy Star Certified
+  - Warranty: 5 years parts and labor
+
+9. INSTALLATION REQUIREMENTS
+
+9.1 Site Preparation
+  - Clean, dry location required
+  - Minimum 1m clearance on all sides for ventilation
+  - Floor must support 2.08 kg/cm² loading
+  - Power distribution panel within 5m of UPS
+  - Dedicated neutral and ground conductors required
+
+9.2 Environmental Requirements
+  - Indoor installation only
+  - IP54 rating (dust and splash protection)
+  - Anti-vibration mounting (4 mounts, 50mm deflection)
+  - Acoustic enclosure recommended if noise is concern
+
+9.3 Integration with Building Systems
+  - Building Management System (BMS) integration via Modbus TCP
+  - Fire alarm system notification
+  - HVAC load shedding capability
+  - Emergency lighting integration
+
+10. PERFORMANCE SPECIFICATIONS
+
+10.1 Response Times
+  - Transfer to Battery: < 4ms (ECO mode)
+  - Transfer to Battery: 0ms (Online mode)
+  - Recovery to Normal: < 100ms
+  - Fault Detection: < 10ms
+
+10.2 Load Specifications
+  - Linear Loads: 100% supported
+  - Non-linear Loads: Up to 35% THD supported
+  - Motor Starting: Up to 200% inrush current (2 seconds)
+  - Transformer Load: Fully supported
+
+10.3 Acoustic Specifications
+  - Idle Operation: 60 dB(A)
+  - 50% Load: 70 dB(A)
+  - Full Load: 75 dB(A)
+  - Peak Noise: 78 dB(A)
+
+11. WARRANTY AND SUPPORT
+
+  - Standard Warranty: 5 years parts and labor
+  - Extended Warranty: Available up to 10 years
+  - On-site Support: 4-hour response time (24/7)
+  - Remote Monitoring Subscription: Annual license included for 2 years
+  - Training: 2 days of on-site technician training included
+
+12. ORDERING INFORMATION
+
+Model: PWG-PRO-500-3PH
+Configuration Options:
+  - PWG-PRO-500-LI: Lithium-Ion battery (standard)
+  - PWG-PRO-500-LA: Lead-Acid battery (economy option)
+  - PWG-PRO-500-EX: Extended battery configuration (600 kWh)
+
+Accessories Available:
+  - Environmental Monitoring Unit
+  - Automatic Transfer Switch (ATS)
+  - SNMP Card
+  - Surge Suppression Module
+  - Bypass Isolation Transformer
+
+================================================================================
+END OF SPECIFICATION
+================================================================================

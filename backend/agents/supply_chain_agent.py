@@ -1,20 +1,7 @@
 """
 Supply Chain Visibility & Risk Agent module.
 
-Tracks equipment shipments across data centre projects, monitors delivery status,
-identifies at-risk items, calculates buffer analysis, and provides real-time
-supply chain visibility. Integrates with Cerebras for AI-driven risk assessment
-and Supabase for persistent tracking.
-
-Key capabilities:
-- CSV-based shipment ingestion with automatic at-risk flagging
-- Real-time risk scoring based on buffer days and critical path impact
-- Leaflet-compatible GeoJSON mapping of shipment locations
-- Procurement alternative analysis using Cerebras LLM
-- Alert generation with urgency levels and recommended actions
-- Manual shipment entry via REST API
-
-Production-quality with full error handling, logging, and type safety.
+Tracks equipment shipments across data centre projects and monitors delivery status.
 """
 
 import json
