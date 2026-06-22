@@ -1,5 +1,5 @@
 /**
- * Schedule Risk Engine Page
+ * Schedule Risk Engine Page (Premium Design)
  * 
  * Three tabs:
  * - Tab 1: Risk Report (critical risks, actions, health status)
@@ -73,44 +73,49 @@ export default function ScheduleAgent() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const getHealthColor = (health) => {
-    if (health === 'GREEN') return 'green';
-    if (health === 'AMBER') return 'orange';
-    return 'red';
-  };
-
   return (
-    <div className="p-6 space-y-6 overflow-y-auto">
+    <div className="p-6 space-y-6 overflow-y-auto bg-[#0A0A0F] min-h-screen">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <Calendar size={24} className="text-indigo-400" />
+          Schedule Risk Analysis
+        </h1>
+        <p className="text-slate-500 text-sm mt-1">Identify and mitigate schedule risks</p>
+      </div>
+
       {/* Upload Section */}
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-        <h2 className="text-xl font-bold mb-4">Upload Schedule</h2>
+      <div className="bg-[#111118] border border-white/[0.06] rounded-2xl shadow-xl shadow-black/20 p-6">
+        <h2 className="text-sm font-semibold text-white mb-5">Upload Schedules</h2>
 
         <div className="grid grid-cols-2 gap-6 mb-6">
           <div>
-            <label className="text-sm font-semibold text-gray-300 mb-2 block">
-              Current Schedule
-            </label>
+            <label className="section-title">Current Schedule</label>
             <FileUpload
               accept=".xlsx"
               label="Upload Current Schedule (.xlsx)"
-              onFileSelect={(files) => setScheduleFile(files[0])}
+              onUpload={(file) => setScheduleFile(file)}
             />
             {scheduleFile && (
-              <p className="text-xs text-green-400 mt-2">✓ {scheduleFile.name}</p>
+              <div className="flex items-center gap-2 mt-2 p-2 bg-emerald-500/10 rounded-lg">
+                <Check size={14} className="text-emerald-400" />
+                <span className="text-xs text-emerald-400">{scheduleFile.name}</span>
+              </div>
             )}
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-gray-300 mb-2 block">
-              Baseline Schedule (Optional)
-            </label>
+            <label className="section-title">Baseline Schedule (Optional)</label>
             <FileUpload
               accept=".xlsx"
               label="Upload Baseline Schedule (.xlsx)"
-              onFileSelect={(files) => setBaselineFile(files[0])}
+              onUpload={(file) => setBaselineFile(file)}
             />
             {baselineFile && (
-              <p className="text-xs text-green-400 mt-2">✓ {baselineFile.name}</p>
+              <div className="flex items-center gap-2 mt-2 p-2 bg-emerald-500/10 rounded-lg">
+                <Check size={14} className="text-emerald-400" />
+                <span className="text-xs text-emerald-400">{baselineFile.name}</span>
+              </div>
             )}
           </div>
         </div>
@@ -118,7 +123,7 @@ export default function ScheduleAgent() {
         <button
           onClick={handleAnalyse}
           disabled={loading || !scheduleFile}
-          className="w-full px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 rounded-lg text-white font-semibold transition-colors flex items-center justify-center gap-2"
+          className="w-full px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:opacity-50 rounded-xl text-white font-medium transition-colors flex items-center justify-center gap-2"
         >
           {loading ? (
             <>
@@ -127,7 +132,7 @@ export default function ScheduleAgent() {
             </>
           ) : (
             <>
-              <Calendar size={20} />
+              <Calendar size={18} />
               Analyse Schedule
             </>
           )}
@@ -135,24 +140,24 @@ export default function ScheduleAgent() {
       </div>
 
       {/* Tabs */}
-      <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
-        <div className="flex border-b border-gray-700">
+      <div className="bg-[#111118] border border-white/[0.06] rounded-2xl shadow-xl shadow-black/20 overflow-hidden">
+        <div className="flex border-b border-white/5">
           <button
             onClick={() => setActiveTab('report')}
-            className={`flex-1 px-6 py-3 font-semibold transition-colors ${
+            className={`flex-1 px-6 py-3 font-medium text-sm transition-colors ${
               activeTab === 'report'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-indigo-500/20 text-indigo-400 border-b-2 border-indigo-500'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             Risk Report
           </button>
           <button
             onClick={() => setActiveTab('trend')}
-            className={`flex-1 px-6 py-3 font-semibold transition-colors ${
+            className={`flex-1 px-6 py-3 font-medium text-sm transition-colors ${
               activeTab === 'trend'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-indigo-500/20 text-indigo-400 border-b-2 border-indigo-500'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             Risk Trend
@@ -162,10 +167,10 @@ export default function ScheduleAgent() {
               setActiveTab('weekly');
               handleGenerateReport();
             }}
-            className={`flex-1 px-6 py-3 font-semibold transition-colors ${
+            className={`flex-1 px-6 py-3 font-medium text-sm transition-colors ${
               activeTab === 'weekly'
-                ? 'bg-blue-600 text-white'
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-indigo-500/20 text-indigo-400 border-b-2 border-indigo-500'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             Weekly Report
@@ -180,22 +185,22 @@ export default function ScheduleAgent() {
               {results ? (
                 <>
                   {/* Health Status */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between p-4 bg-white/[0.02] rounded-xl border border-white/5">
                     <div>
-                      <p className="text-sm text-gray-400 mb-1">Project Health</p>
+                      <p className="text-sm text-slate-600 mb-2">Project Health</p>
                       <StatusBadge status={results.project_health} />
                     </div>
                     <div className="text-right">
-                      <p className="text-3xl font-bold">
+                      <p className="text-3xl font-bold text-white">
                         {results.overall_risk_score}
                       </p>
-                      <p className="text-xs text-gray-400">Risk Score</p>
+                      <p className="text-xs text-slate-600">Risk Score</p>
                     </div>
                   </div>
 
                   {/* Executive Summary */}
-                  <div className="bg-gray-700/50 rounded-lg p-4">
-                    <p className="text-sm text-gray-300">
+                  <div className="bg-white/[0.02] rounded-lg p-4 border border-white/5">
+                    <p className="text-sm text-slate-300">
                       {results.executive_summary}
                     </p>
                   </div>
@@ -203,38 +208,38 @@ export default function ScheduleAgent() {
                   {/* Critical Risks */}
                   {results.critical_risks && results.critical_risks.length > 0 && (
                     <div>
-                      <h4 className="font-semibold mb-3">
+                      <h4 className="text-sm font-semibold text-white mb-3">
                         Critical Risks ({results.critical_risks.length})
                       </h4>
-                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                      <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
                         {results.critical_risks.map((risk) => (
                           <div
                             key={risk.risk_id}
-                            className="bg-gray-700/50 border border-red-500/30 rounded-lg p-4"
+                            className="bg-red-500/5 border border-red-500/20 rounded-lg p-4"
                           >
                             <div className="flex items-start justify-between mb-2">
                               <div>
-                                <p className="font-semibold">{risk.task_name}</p>
+                                <p className="font-semibold text-white">{risk.task_name}</p>
                                 <StatusBadge status={risk.severity} />
                               </div>
                               <div className="text-right">
                                 <p className="text-lg font-bold text-red-400">
                                   {risk.potential_delay_days}d
                                 </p>
-                                <p className="text-xs text-gray-400">delay</p>
+                                <p className="text-xs text-slate-600">delay</p>
                               </div>
                             </div>
 
-                            <p className="text-sm text-gray-300 mb-3">
+                            <p className="text-sm text-slate-300 mb-3">
                               {risk.description}
                             </p>
 
                             {risk.mitigation_options && (
                               <div>
-                                <p className="text-xs font-semibold text-gray-400 mb-2">
+                                <p className="text-xs font-semibold text-slate-500 mb-2">
                                   Mitigation:
                                 </p>
-                                <ul className="text-xs text-gray-300 space-y-1">
+                                <ul className="text-xs text-slate-400 space-y-1">
                                   {risk.mitigation_options.map((action, idx) => (
                                     <li key={idx}>
                                       • {action}
@@ -252,14 +257,14 @@ export default function ScheduleAgent() {
                   {/* Recommended Actions */}
                   {results.recommended_immediate_actions && (
                     <div>
-                      <h4 className="font-semibold mb-3">
+                      <h4 className="text-sm font-semibold text-white mb-3">
                         Recommended Immediate Actions
                       </h4>
-                      <ol className="text-sm text-gray-300 space-y-2">
+                      <ol className="text-sm text-slate-300 space-y-2">
                         {results.recommended_immediate_actions.map(
                           (action, idx) => (
                             <li key={idx} className="flex gap-3">
-                              <span className="font-semibold">
+                              <span className="font-semibold text-indigo-400">
                                 {idx + 1}.
                               </span>
                               <span>{action}</span>
@@ -271,7 +276,7 @@ export default function ScheduleAgent() {
                   )}
                 </>
               ) : (
-                <p className="text-gray-400 text-center py-12">
+                <p className="text-slate-600 text-center py-12">
                   Upload and analyze a schedule to view risk report
                 </p>
               )}
@@ -286,27 +291,28 @@ export default function ScheduleAgent() {
                   <AreaChart data={trendData}>
                     <defs>
                       <linearGradient id="colorRisk" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.8} />
-                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#6366F1" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="date" stroke="#9ca3af" />
-                    <YAxis stroke="#9ca3af" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
+                    <XAxis dataKey="date" stroke="#94A3B8" style={{ fontSize: '12px' }} />
+                    <YAxis stroke="#94A3B8" style={{ fontSize: '12px' }} />
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#1f2937', border: '1px solid #374151' }}
+                      contentStyle={{ backgroundColor: '#111118', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                      labelStyle={{ color: '#F1F5F9' }}
                     />
                     <Area
                       type="monotone"
                       dataKey="risk_score_trend"
-                      stroke="#ef4444"
+                      stroke="#6366F1"
                       fillOpacity={1}
                       fill="url(#colorRisk)"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="text-gray-400 text-center py-12">
+                <p className="text-slate-600 text-center py-12">
                   No trend data available
                 </p>
               )}
@@ -321,7 +327,7 @@ export default function ScheduleAgent() {
                   <div className="flex gap-2 mb-4">
                     <button
                       onClick={copyToClipboard}
-                      className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white text-sm font-semibold flex items-center gap-2"
+                      className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white text-sm font-medium flex items-center gap-2 transition-colors"
                     >
                       {copied ? (
                         <>
@@ -336,12 +342,12 @@ export default function ScheduleAgent() {
                       )}
                     </button>
                   </div>
-                  <div className="bg-gray-700/50 rounded-lg p-4 text-sm text-gray-300 whitespace-pre-wrap max-h-96 overflow-y-auto font-mono">
+                  <div className="bg-white/[0.02] rounded-lg p-4 text-sm text-slate-300 whitespace-pre-wrap max-h-96 overflow-y-auto font-mono border border-white/5">
                     {reportData}
                   </div>
                 </div>
               ) : (
-                <p className="text-gray-400 text-center py-12">
+                <p className="text-slate-600 text-center py-12">
                   Click on Weekly Report tab to generate
                 </p>
               )}

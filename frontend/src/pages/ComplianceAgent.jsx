@@ -1,5 +1,5 @@
 /**
- * Spec Compliance Agent Page
+ * Spec Compliance Agent Page (Premium Design)
  * 
  * Three sections:
  * - TOP: Upload & compliance check
@@ -8,7 +8,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Upload, CheckCircle, AlertTriangle } from 'lucide-react';
+import { CheckCircle, AlertTriangle, FileText } from 'lucide-react';
 import FileUpload from '../components/FileUpload';
 import StatusBadge from '../components/StatusBadge';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -67,66 +67,68 @@ export default function ComplianceAgent() {
     }
   };
 
-  const getComplianceColor = (status) => {
-    if (status === 'COMPLIANT') return 'green';
-    if (status === 'MINOR_DEVIATIONS') return 'yellow';
-    if (status === 'MAJOR_DEVIATIONS') return 'orange';
-    return 'red';
-  };
-
   return (
-    <div className="p-6 space-y-6 overflow-y-auto">
+    <div className="p-6 space-y-6 overflow-y-auto bg-[#0A0A0F] min-h-screen">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+          <CheckCircle size={24} className="text-indigo-400" />
+          Spec Compliance Checker
+        </h1>
+        <p className="text-slate-500 text-sm mt-1">Analyze vendor submittals against specifications</p>
+      </div>
+
       {/* TOP SECTION - Upload & Check */}
-      <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
-        <h2 className="text-xl font-bold mb-4">Compliance Analysis</h2>
+      <div className="bg-[#111118] border border-white/[0.06] rounded-2xl shadow-xl shadow-black/20 p-6">
+        <h2 className="text-sm font-semibold text-white mb-5">Upload Documents</h2>
 
         <div className="grid grid-cols-2 gap-6 mb-6">
           <div>
-            <label className="text-sm font-semibold text-gray-300 mb-2 block">
-              Master Specification
-            </label>
+            <label className="section-title">Master Specification</label>
             <FileUpload
               accept=".pdf"
               label="Upload Specification (PDF)"
-              onFileSelect={(files) => setSpecFile(files[0])}
+              onUpload={(file) => setSpecFile(file)}
             />
             {specFile && (
-              <p className="text-xs text-green-400 mt-2">✓ {specFile.name}</p>
+              <div className="flex items-center gap-2 mt-2 p-2 bg-emerald-500/10 rounded-lg">
+                <FileText size={16} className="text-emerald-400 flex-shrink-0" />
+                <span className="text-xs text-emerald-400">{specFile.name}</span>
+              </div>
             )}
           </div>
 
           <div>
-            <label className="text-sm font-semibold text-gray-300 mb-2 block">
-              Vendor Submittal
-            </label>
+            <label className="section-title">Vendor Submittal</label>
             <FileUpload
               accept=".pdf"
               label="Upload Submittal (PDF)"
-              onFileSelect={(files) => setSubmittalFile(files[0])}
+              onUpload={(file) => setSubmittalFile(file)}
             />
             {submittalFile && (
-              <p className="text-xs text-green-400 mt-2">✓ {submittalFile.name}</p>
+              <div className="flex items-center gap-2 mt-2 p-2 bg-emerald-500/10 rounded-lg">
+                <FileText size={16} className="text-emerald-400 flex-shrink-0" />
+                <span className="text-xs text-emerald-400">{submittalFile.name}</span>
+              </div>
             )}
           </div>
         </div>
 
         <div className="mb-6">
-          <label className="text-sm font-semibold text-gray-300 mb-2 block">
-            Equipment Type
-          </label>
+          <label className="section-title">Equipment Type</label>
           <input
             type="text"
             value={equipmentType}
             onChange={(e) => setEquipmentType(e.target.value)}
             placeholder="e.g., UPS System, Chiller, Switchgear"
-            className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400"
+            className="input-field w-full"
           />
         </div>
 
         <button
           onClick={handleRunCheck}
           disabled={loading || !specFile || !submittalFile}
-          className="w-full px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 rounded-lg text-white font-semibold transition-colors flex items-center justify-center gap-2"
+          className="w-full px-6 py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:opacity-50 rounded-xl text-white font-medium transition-colors flex items-center justify-center gap-2"
         >
           {loading ? (
             <>
@@ -135,7 +137,7 @@ export default function ComplianceAgent() {
             </>
           ) : (
             <>
-              <CheckCircle size={20} />
+              <CheckCircle size={18} />
               Run Compliance Check
             </>
           )}
@@ -144,29 +146,29 @@ export default function ComplianceAgent() {
 
       {/* MIDDLE SECTION - Results */}
       {results && (
-        <div className="bg-gray-800 border border-gray-700 rounded-xl p-6">
+        <div className="bg-[#111118] border border-white/[0.06] rounded-2xl shadow-xl shadow-black/20 p-6">
           {/* Status Banner */}
           <div
-            className={`mb-6 p-6 rounded-lg ${
+            className={`mb-6 p-6 rounded-2xl border ${
               results.overall_status === 'COMPLIANT'
-                ? 'bg-green-500/10 border border-green-500/30'
+                ? 'bg-emerald-500/10 border-emerald-500/30'
                 : results.overall_status === 'MINOR_DEVIATIONS'
-                ? 'bg-yellow-500/10 border border-yellow-500/30'
-                : 'bg-red-500/10 border border-red-500/30'
+                ? 'bg-amber-500/10 border-amber-500/30'
+                : 'bg-red-500/10 border-red-500/30'
             }`}
           >
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-bold mb-2">
+                <h3 className="text-lg font-bold mb-2 text-white">
                   {results.overall_status?.replace(/_/g, ' ')}
                 </h3>
-                <p className="text-sm text-gray-300">{results.summary}</p>
+                <p className="text-sm text-slate-400">{results.summary}</p>
               </div>
               <div className="text-right">
-                <p className="text-4xl font-bold">
+                <p className="text-4xl font-bold text-white">
                   {results.compliance_score}%
                 </p>
-                <p className="text-xs text-gray-400">Compliance Score</p>
+                <p className="text-xs text-slate-600">Compliance Score</p>
               </div>
             </div>
           </div>
@@ -174,12 +176,12 @@ export default function ComplianceAgent() {
           {/* Findings Table */}
           {results.findings && results.findings.length > 0 && (
             <div>
-              <h4 className="font-semibold mb-4">Findings ({results.findings.length})</h4>
-              <div className="space-y-3 max-h-96 overflow-y-auto">
+              <h4 className="text-sm font-semibold text-white mb-4">Findings ({results.findings.length})</h4>
+              <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
                 {results.findings.map((finding) => (
                   <div
                     key={finding.id}
-                    className="border-l-4 border-red-500 bg-gray-700/50 p-4 rounded"
+                    className="border-l-4 border-red-500 bg-red-500/5 p-4 rounded-lg"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
@@ -188,30 +190,27 @@ export default function ComplianceAgent() {
                         </p>
                         <div className="flex gap-2 mt-1">
                           <StatusBadge status={finding.severity} />
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-slate-600">
                             {finding.clause_reference}
                           </span>
                         </div>
                       </div>
                       <button
                         onClick={() => handleCloseNC(finding.id)}
-                        className="text-xs px-2 py-1 bg-green-600 hover:bg-green-700 rounded text-white"
+                        className="text-xs px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-white transition-colors flex-shrink-0"
                       >
                         Close
                       </button>
                     </div>
 
-                    <p className="text-xs text-gray-300 mb-2">
-                      <span className="font-semibold">Spec:</span>{' '}
-                      {finding.spec_requirement}
+                    <p className="text-xs text-slate-300 mb-2">
+                      <span className="font-semibold">Spec:</span> {finding.spec_requirement}
                     </p>
-                    <p className="text-xs text-gray-300 mb-2">
-                      <span className="font-semibold">Submittal:</span>{' '}
-                      {finding.submittal_value}
+                    <p className="text-xs text-slate-300 mb-2">
+                      <span className="font-semibold">Submittal:</span> {finding.submittal_value}
                     </p>
-                    <p className="text-xs text-gray-400">
-                      <span className="font-semibold">Action:</span>{' '}
-                      {finding.recommended_action}
+                    <p className="text-xs text-slate-500">
+                      <span className="font-semibold">Action:</span> {finding.recommended_action}
                     </p>
                   </div>
                 ))}
@@ -224,23 +223,23 @@ export default function ComplianceAgent() {
       {/* BOTTOM SECTION - NC Dashboard */}
       {dashboard && (
         <div className="grid grid-cols-3 gap-4">
-          <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6">
-            <p className="text-sm text-gray-400 mb-1">Open Critical</p>
+          <div className="bg-[#111118] border border-white/[0.06] rounded-2xl shadow-xl shadow-black/20 p-6 hover:border-white/10 transition-all">
+            <p className="text-sm text-slate-600 mb-2">Open Critical</p>
             <p className="text-3xl font-bold text-red-400">
               {dashboard.critical || 0}
             </p>
           </div>
 
-          <div className="bg-orange-500/10 border border-orange-500/30 rounded-xl p-6">
-            <p className="text-sm text-gray-400 mb-1">Open Major</p>
-            <p className="text-3xl font-bold text-orange-400">
+          <div className="bg-[#111118] border border-white/[0.06] rounded-2xl shadow-xl shadow-black/20 p-6 hover:border-white/10 transition-all">
+            <p className="text-sm text-slate-600 mb-2">Open Major</p>
+            <p className="text-3xl font-bold text-amber-400">
               {dashboard.major || 0}
             </p>
           </div>
 
-          <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-6">
-            <p className="text-sm text-gray-400 mb-1">Closed This Week</p>
-            <p className="text-3xl font-bold text-green-400">
+          <div className="bg-[#111118] border border-white/[0.06] rounded-2xl shadow-xl shadow-black/20 p-6 hover:border-white/10 transition-all">
+            <p className="text-sm text-slate-600 mb-2">Closed This Week</p>
+            <p className="text-3xl font-bold text-emerald-400">
               {dashboard.closed_this_week || 0}
             </p>
           </div>

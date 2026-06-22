@@ -1,15 +1,8 @@
-/**
- * RFI Intelligence Agent Page
- * 
- * Two-panel layout:
- * - LEFT: Document library with upload and indexed docs list
- * - RIGHT: Chat interface with message history, citations, and input
- */
-
 import { useState, useEffect, useRef } from 'react';
-import { MessageSquare, Upload, Send, Zap } from 'lucide-react';
+import { MessageSquare, Send, Zap, FileText } from 'lucide-react';
 import FileUpload from '../components/FileUpload';
 import LoadingSpinner from '../components/LoadingSpinner';
+import MarkdownRenderer from '../components/MarkdownRenderer';
 import { rfiApi } from '../api/client';
 
 export default function RFIAgent() {
@@ -18,7 +11,6 @@ export default function RFIAgent() {
   const [inputValue, setInputValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [responseTime, setResponseTime] = useState(null);
-  const [ingestingFiles, setIngestingFiles] = useState(false);
   const [docTypeFilter, setDocTypeFilter] = useState('Specification');
   const messagesEndRef = useRef(null);
 
@@ -68,7 +60,6 @@ export default function RFIAgent() {
   const handleFileSelect = async (file) => {
     if (!file) return;
 
-    setIngestingFiles(true);
     try {
       const response = await rfiApi.ingestBatch([file]);
       const result = response.data;
@@ -90,8 +81,6 @@ export default function RFIAgent() {
         ...prev,
         { type: 'ai', text: '❌ Failed to ingest documents. Please try again.' },
       ]);
-    } finally {
-      setIngestingFiles(false);
     }
   };
 
@@ -132,16 +121,17 @@ export default function RFIAgent() {
   };
 
   return (
-    <div className="flex h-full gap-6 p-6">
+    <div className="flex h-full gap-6 p-6 bg-[#0A0A0F]">
       {/* Left Panel - Document Library */}
-      <div className="w-1/3 bg-gray-800 border border-gray-700 rounded-xl p-6 flex flex-col">
-        <h2 className="text-xl font-bold mb-4">📁 Document Library</h2>
+      <div className="w-80 bg-[#111118] border border-white/[0.06] rounded-2xl shadow-xl shadow-black/20 p-6 flex flex-col">
+        <h2 className="text-sm font-semibold text-white mb-5 flex items-center gap-2">
+          <FileText size={16} className="text-indigo-400" />
+          Document Library
+        </h2>
 
         {/* Upload Section */}
         <div className="mb-6">
-          <label className="text-sm font-semibold text-gray-300 mb-2 block">
-            Upload Documents
-          </label>
+          <label className="section-title">Upload Documents</label>
           <FileUpload
             accept=".pdf"
             onUpload={handleFileSelect}
@@ -150,14 +140,12 @@ export default function RFIAgent() {
         </div>
 
         {/* Doc Type Filter */}
-        <div className="mb-4">
-          <label className="text-xs font-semibold text-gray-400 mb-2 block">
-            Document Type
-          </label>
+        <div className="mb-5">
+          <label className="section-title">Document Type</label>
           <select
             value={docTypeFilter}
             onChange={(e) => setDocTypeFilter(e.target.value)}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-white"
+            className="input-field w-full"
           >
             <option>Specification</option>
             <option>RFI</option>
@@ -170,30 +158,26 @@ export default function RFIAgent() {
 
         {/* Documents List */}
         <div className="flex-1 overflow-y-auto space-y-2">
-          <p className="text-xs text-gray-500 mb-3">
+          <p className="text-xs text-slate-600 mb-3">
             {documents.length} documents indexed
           </p>
           {documents.length > 0 ? (
             documents.map((doc, idx) => (
               <div
                 key={idx}
-                className="p-3 bg-gray-700/50 rounded-lg border border-gray-600 text-sm"
+                className="flex items-center gap-2 p-2.5 rounded-lg hover:bg-white/5 transition-colors group cursor-pointer"
               >
-                <p className="font-medium text-white truncate">
-                  {doc.filename}
-                </p>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-xs bg-blue-500/30 text-blue-300 px-2 py-1 rounded">
-                    {doc.doc_type || 'Document'}
-                  </span>
-                  <span className="text-xs text-gray-400">
-                    {doc.chunk_count || 0} chunks
-                  </span>
+                <FileText size={14} className="text-slate-500 flex-shrink-0 group-hover:text-indigo-400 transition-colors" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-slate-300 text-sm truncate">{doc.filename}</p>
                 </div>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex-shrink-0">
+                  {doc.doc_type || 'Doc'}
+                </span>
               </div>
             ))
           ) : (
-            <p className="text-xs text-gray-500 text-center py-6">
+            <p className="text-xs text-slate-600 text-center py-8">
               No documents yet. Upload to get started.
             </p>
           )}
@@ -201,16 +185,19 @@ export default function RFIAgent() {
       </div>
 
       {/* Right Panel - Chat Interface */}
-      <div className="flex-1 bg-gray-800 border border-gray-700 rounded-xl p-6 flex flex-col">
-        <h2 className="text-xl font-bold mb-4">💬 Ask Project Documents</h2>
+      <div className="flex-1 bg-[#111118] border border-white/[0.06] rounded-2xl shadow-xl shadow-black/20 p-6 flex flex-col">
+        <h2 className="text-sm font-semibold text-white mb-5 flex items-center gap-2">
+          <MessageSquare size={16} className="text-indigo-400" />
+          Ask Project Documents
+        </h2>
 
         {/* Chat History */}
-        <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+        <div className="flex-1 overflow-y-auto mb-4 space-y-4 pr-2">
           {messages.length === 0 ? (
             <div className="flex items-center justify-center h-full text-center">
               <div>
-                <MessageSquare size={48} className="mx-auto mb-2 text-gray-500" />
-                <p className="text-gray-400">
+                <MessageSquare size={48} className="mx-auto mb-3 text-slate-700" />
+                <p className="text-slate-600 text-sm">
                   Upload documents and ask questions about your project
                 </p>
               </div>
@@ -219,24 +206,35 @@ export default function RFIAgent() {
             messages.map((msg, idx) => (
               <div key={idx}>
                 {msg.type === 'user' ? (
-                  <div className="flex justify-end mb-2">
-                    <div className="max-w-md bg-blue-600 rounded-lg p-3 text-white text-sm">
+                  <div className="flex justify-end mb-3">
+                    <div className="bg-indigo-600 text-white rounded-2xl rounded-br-sm px-4 py-2.5 text-sm max-w-[80%]">
                       {msg.text}
                     </div>
                   </div>
                 ) : (
-                  <div className="flex justify-start">
-                    <div className="max-w-md bg-gray-700 rounded-lg p-3 text-gray-200 text-sm">
-                      {msg.text}
-                      {msg.citations && msg.citations.length > 0 && (
-                        <div className="mt-3 space-y-1 border-t border-gray-600 pt-2">
+                  <div className="flex justify-start mb-3">
+                    <div className="bg-[#1A1A24] border border-white/5 text-slate-200 rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm max-w-[85%]">
+                      <MarkdownRenderer text={msg.text} />
+                      {Array.isArray(msg.citations) && msg.citations.length > 0 && (
+                        <div className="mt-3 space-y-1.5 border-t border-white/5 pt-2.5">
                           {msg.citations.map((citation, cidx) => (
-                            <button
-                              key={cidx}
-                              className="text-xs text-blue-400 hover:text-blue-300 block truncate"
-                            >
-                              [SOURCE {cidx + 1}] {citation}
-                            </button>
+                            <div key={citation?.source_id || cidx}>
+                              <div className="text-xs text-indigo-400 font-medium mb-0.5">
+                                [SOURCE {cidx + 1}] {citation?.filename || 'Unknown'}
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-slate-400">
+                                {citation?.doc_type && (
+                                  <span className="bg-white/5 px-1.5 py-0.5 rounded">
+                                    {citation.doc_type}
+                                  </span>
+                                )}
+                                {citation?.relevance_score && (
+                                  <span className="bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded">
+                                    {(citation.relevance_score * 100).toFixed(0)}% match
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           ))}
                         </div>
                       )}
@@ -247,8 +245,8 @@ export default function RFIAgent() {
             ))
           )}
           {loading && (
-            <div className="flex justify-start">
-              <div className="bg-gray-700 rounded-lg p-3">
+            <div className="flex justify-start mb-3">
+              <div className="bg-[#1A1A24] border border-white/5 rounded-2xl rounded-bl-sm px-4 py-2.5">
                 <LoadingSpinner size="sm" message="Analysing documents..." />
               </div>
             </div>
@@ -258,28 +256,27 @@ export default function RFIAgent() {
 
         {/* Response Time Indicator */}
         {responseTime && (
-          <div className="text-xs text-gray-400 mb-2 flex items-center gap-1">
-            <Zap size={14} className="text-purple-400" />
+          <div className="bg-[#0D0D14] border-t border-white/5 px-0 py-3 text-xs text-slate-500 flex items-center gap-2 mb-4">
+            <Zap size={14} className="text-amber-400" />
             Answered in {responseTime}s (Cerebras llama-3.3-70b)
           </div>
         )}
 
-        {/* Input */}
-        <form onSubmit={handleSendMessage} className="flex gap-2">
+        {/* Input Area */}
+        <form onSubmit={handleSendMessage} className="flex gap-2.5">
           <textarea
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Ask a question about your project documents..."
-            className="flex-1 px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            className="textarea-field flex-1"
             rows="3"
           />
           <button
             type="submit"
             disabled={loading || !inputValue.trim()}
-            className="px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded-lg text-white font-medium flex items-center gap-2 transition-colors"
+            className="px-3 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:opacity-50 rounded-xl text-white font-medium flex items-center justify-center transition-colors flex-shrink-0"
           >
             <Send size={18} />
-            Ask
           </button>
         </form>
       </div>

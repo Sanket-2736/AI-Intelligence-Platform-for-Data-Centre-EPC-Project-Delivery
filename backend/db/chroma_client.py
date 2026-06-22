@@ -156,8 +156,10 @@ class ChromaManager:
         skipped = 0
         
         try:
+            logger.info(f"[CHROMA] ingest_chunks called: collection={collection_name}, chunks={len(chunks)}")
+            
             if not chunks:
-                logger.warning(f"No chunks provided for {collection_name}")
+                logger.warning(f"[CHROMA] No chunks provided for {collection_name}")
                 return {
                     'ingested': 0,
                     'skipped': 0,
@@ -168,14 +170,17 @@ class ChromaManager:
                     'error': None
                 }
             
+            logger.info(f"[CHROMA] Getting collection: {collection_name}")
             collection = self.get_collection(collection_name)
+            logger.info(f"[CHROMA] Collection retrieved successfully")
             
             # Prepare documents for batch insert
+            logger.info(f"[CHROMA] Preparing {len(chunks)} chunks for batch insert")
             ids = []
             texts = []
             metadatas = []
             
-            for chunk in chunks:
+            for i, chunk in enumerate(chunks):
                 try:
                     text = chunk.get('text', '')
                     metadata = chunk.get('metadata', {})
@@ -193,34 +198,38 @@ class ChromaManager:
                     metadatas.append(metadata)
                     
                 except Exception as e:
-                    logger.warning(f"Error processing chunk: {str(e)}")
+                    logger.warning(f"[CHROMA] Error processing chunk {i}: {str(e)}")
                     skipped += 1
                     continue
             
+            logger.info(f"[CHROMA] Prepared {len(ids)} documents for upsert (skipped {skipped})")
+            
             # Batch upsert in groups of 100
             batch_size = 100
-            for i in range(0, len(ids), batch_size):
+            for batch_num, i in enumerate(range(0, len(ids), batch_size)):
                 batch_ids = ids[i:i+batch_size]
                 batch_texts = texts[i:i+batch_size]
                 batch_metadatas = metadatas[i:i+batch_size]
                 
                 try:
+                    logger.info(f"[CHROMA] Upserting batch {batch_num + 1} ({len(batch_ids)} documents)...")
                     collection.upsert(
                         ids=batch_ids,
                         documents=batch_texts,
                         metadatas=batch_metadatas
                     )
                     ingested += len(batch_ids)
-                    logger.info(f"Batch upserted {len(batch_ids)} documents to {collection_name}")
+                    logger.info(f"[CHROMA] Batch {batch_num + 1} upserted successfully. Total ingested so far: {ingested}")
                     
                 except Exception as e:
-                    logger.error(f"Error upserting batch: {str(e)}")
+                    logger.error(f"[CHROMA] Error upserting batch {batch_num + 1}: {str(e)}")
+                    logger.exception(f"[CHROMA] Batch upsert exception traceback")
                     skipped += len(batch_ids)
             
             duration = time.time() - start_time
             
             logger.info(
-                f"Ingestion complete for {collection_name}: "
+                f"[CHROMA] Ingestion complete for {collection_name}: "
                 f"{ingested} ingested, {skipped} skipped in {duration:.2f}s"
             )
             
@@ -238,6 +247,7 @@ class ChromaManager:
             duration = time.time() - start_time
             error_msg = f"Error ingesting chunks: {str(e)}"
             logger.error(error_msg)
+            logger.exception(f"[CHROMA] Exception traceback for ingestion")
             
             return {
                 'ingested': ingested,

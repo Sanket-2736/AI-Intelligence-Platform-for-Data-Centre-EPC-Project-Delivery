@@ -17,92 +17,116 @@ logger = logging.getLogger(__name__)
 def extract_text_pymupdf(file_path: str) -> Dict[str, Any]:
     """
     Extract text from PDF using PyMuPDF (fitz).
-    
+
     Args:
         file_path: Path to PDF file
-        
+
     Returns:
         {
             'filename': str,
             'total_pages': int,
-            'pages': [{'page': int, 'text': str, 'char_count': int, 'bbox': tuple}],
+            'pages': list,
             'full_text': str,
             'success': bool,
             'error': Optional[str]
         }
     """
     try:
-        if not Path(file_path).exists():
+        pdf_path = Path(file_path)
+
+        if not pdf_path.exists():
             return {
-                'filename': Path(file_path).name,
-                'total_pages': 0,
-                'pages': [],
-                'full_text': '',
-                'success': False,
-                'error': f'File not found: {file_path}'
+                "filename": pdf_path.name,
+                "total_pages": 0,
+                "pages": [],
+                "full_text": "",
+                "success": False,
+                "error": f"File not found: {file_path}"
             }
 
+        logger.info(f"Opening PDF: {file_path}")
+
         doc = fitz.open(file_path)
+
+        total_pages = len(doc)
+
+        logger.info(
+            f"PDF opened successfully: {pdf_path.name} "
+            f"({total_pages} pages)"
+        )
+
         pages = []
-        full_text = []
+        full_text_parts = []
 
-        for page_num in range(len(doc)):
+        for page_num in range(total_pages):
             try:
-                page = doc[page_num]
-                text = page.get_text()
-                char_count = len(text)
-                bbox = page.rect  # Bounding box of page
+                page = doc.load_page(page_num)
+
+                text = page.get_text("text") or ""
+
+                rect = page.rect
 
                 pages.append({
-                    'page': page_num + 1,
-                    'text': text,
-                    'char_count': char_count,
-                    'bbox': (bbox.x0, bbox.y0, bbox.x1, bbox.y1)
+                    "page": page_num + 1,
+                    "text": text,
+                    "char_count": len(text),
+                    "bbox": (
+                        rect.x0,
+                        rect.y0,
+                        rect.x1,
+                        rect.y1
+                    )
                 })
-                full_text.append(text)
 
-            except Exception as e:
-                logger.warning(f"Error extracting page {page_num + 1}: {str(e)}")
+                full_text_parts.append(text)
+
+            except Exception as page_error:
+                logger.warning(
+                    f"Failed reading page {page_num + 1}: "
+                    f"{page_error}"
+                )
+
                 pages.append({
-                    'page': page_num + 1,
-                    'text': '',
-                    'char_count': 0,
-                    'bbox': None,
-                    'error': str(e)
+                    "page": page_num + 1,
+                    "text": "",
+                    "char_count": 0,
+                    "bbox": None,
+                    "error": str(page_error)
                 })
+
+        full_text = "\n\n".join(full_text_parts)
+
+        extracted_chars = len(full_text)
 
         doc.close()
 
+        logger.info(
+            f"PDF extraction completed. "
+            f"Pages={total_pages}, "
+            f"Chars={extracted_chars}"
+        )
+
         return {
-            'filename': Path(file_path).name,
-            'total_pages': len(doc),
-            'pages': pages,
-            'full_text': '\n\n'.join(full_text),
-            'success': True,
-            'error': None
+            "filename": pdf_path.name,
+            "total_pages": total_pages,
+            "pages": pages,
+            "full_text": full_text,
+            "success": True,
+            "error": None
         }
 
-    except fitz.FileError as e:
-        error_msg = f"PDF file error (possibly encrypted/corrupt): {str(e)}"
-        logger.error(error_msg)
-        return {
-            'filename': Path(file_path).name,
-            'total_pages': 0,
-            'pages': [],
-            'full_text': '',
-            'success': False,
-            'error': error_msg
-        }
     except Exception as e:
-        error_msg = f"Unexpected error extracting PDF: {str(e)}"
-        logger.error(error_msg)
+        logger.exception(
+            f"PDF extraction failed for {file_path}"
+        )
+
         return {
-            'filename': Path(file_path).name,
-            'total_pages': 0,
-            'pages': [],
-            'full_text': '',
-            'success': False,
-            'error': error_msg
+            "filename": Path(file_path).name,
+            "total_pages": 0,
+            "pages": [],
+            "full_text": "",
+            "success": False,
+            "error": str(e)
         }
 
 

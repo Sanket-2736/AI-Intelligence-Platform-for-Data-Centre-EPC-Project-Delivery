@@ -1,7 +1,7 @@
 /**
- * Loading Spinner Component
+ * Loading Spinner Component (Premium Design)
  * 
- * Animated spinner with optional loading message.
+ * Modern animated spinner with optional loading message.
  * Sizes: sm (16px), md (24px), lg (32px)
  */
 
@@ -13,15 +13,12 @@ export default function LoadingSpinner({ size = 'md', message = 'Processing with
   };
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3">
-      <div className={`${sizeMap[size]} animate-spin`}>
-        <div className="relative w-full h-full">
-          <div className="absolute inset-0 rounded-full border-2 border-gray-700"></div>
-          <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-blue-500 border-r-blue-500 animate-spin"></div>
-        </div>
+    <div className="flex items-center gap-3">
+      <div className={`${sizeMap[size]} relative`}>
+        <div className="absolute inset-0 rounded-full border-2 border-indigo-500/20 border-t-indigo-500 animate-spin"></div>
       </div>
       {message && (
-        <p className="text-sm text-gray-400 animate-pulse">{message}</p>
+        <span className="text-slate-400 text-sm">{message}</span>
       )}
     </div>
   );

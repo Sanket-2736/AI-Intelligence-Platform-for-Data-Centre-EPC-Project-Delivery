@@ -41,6 +41,7 @@ class SupabaseManager:
     """
     Singleton manager for Supabase PostgreSQL database.
     Handles all CRUD operations for platform tables.
+    Uses service role key for write operations to bypass RLS policies.
     """
     
     _instance = None
@@ -53,17 +54,24 @@ class SupabaseManager:
         return cls._instance
     
     def __init__(self):
-        """Initialize Supabase client."""
+        """Initialize Supabase clients (read and write)."""
         if self._initialized:
             return
         
         try:
+            # Anon key for general operations (respects RLS)
             self.client: Client = create_client(
                 config.SUPABASE_URL,
                 config.SUPABASE_ANON_KEY
             )
             
-            logger.info("Supabase client initialized")
+            # Service role key for backend writes (bypasses RLS)
+            self.admin_client: Client = create_client(
+                config.SUPABASE_URL,
+                config.SUPABASE_SERVICE_ROLE_KEY
+            )
+            
+            logger.info("Supabase clients initialized (anon + service role)")
             
             # Test connection
             if self.test_connection():
@@ -100,6 +108,7 @@ class SupabaseManager:
     def insert_non_conformance(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Insert a new non-conformance record.
+        Uses service role key to bypass RLS policies.
         
         Args:
             data: Dict with nc_id, severity, clause_ref, description, etc.
@@ -117,7 +126,7 @@ class SupabaseManager:
             data.setdefault('created_at', datetime.utcnow().isoformat())
             data.setdefault('updated_at', datetime.utcnow().isoformat())
             
-            result = self.client.table('non_conformances').insert(data).execute()
+            result = self.admin_client.table('non_conformances').insert(data).execute()
             
             logger.info(f"Non-conformance inserted: {data.get('nc_id')}")
             
@@ -171,6 +180,7 @@ class SupabaseManager:
     ) -> Dict[str, Any]:
         """
         Update non-conformance status and resolution.
+        Uses service role key to bypass RLS policies.
         
         Args:
             nc_id: Non-conformance ID
@@ -193,7 +203,7 @@ class SupabaseManager:
             if resolution:
                 update_data['recommended_action'] = resolution
             
-            result = self.client.table('non_conformances').update(
+            result = self.admin_client.table('non_conformances').update(
                 update_data
             ).eq('nc_id', nc_id).execute()
             
@@ -275,6 +285,7 @@ class SupabaseManager:
     def insert_schedule_risk(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Insert a schedule risk record.
+        Uses service role key to bypass RLS policies.
         
         Args:
             data: Dict with task_name, risk_level, risk_description, etc.
@@ -290,7 +301,7 @@ class SupabaseManager:
             data.setdefault('snapshot_date', datetime.now().date().isoformat())
             data.setdefault('created_at', datetime.utcnow().isoformat())
             
-            result = self.client.table('schedule_risks').insert(data).execute()
+            result = self.admin_client.table('schedule_risks').insert(data).execute()
             
             logger.info(f"Schedule risk inserted: {data.get('task_name')}")
             
@@ -383,6 +394,7 @@ class SupabaseManager:
     def upsert_shipment(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Upsert a shipment record (insert or update if exists).
+        Uses service role key to bypass RLS policies.
         
         Args:
             data: Dict with equipment_name, supplier, status, eta, etc.
@@ -398,7 +410,7 @@ class SupabaseManager:
             data.setdefault('created_at', datetime.utcnow().isoformat())
             data.setdefault('updated_at', datetime.utcnow().isoformat())
             
-            result = self.client.table('shipments').upsert(
+            result = self.admin_client.table('shipments').upsert(
                 data,
                 on_conflict='equipment_name'
             ).execute()
@@ -462,6 +474,7 @@ class SupabaseManager:
     def bulk_upsert_shipments(self, items: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Bulk upsert multiple shipment records.
+        Uses service role key to bypass RLS policies.
         
         Args:
             items: List of shipment dicts
@@ -482,7 +495,7 @@ class SupabaseManager:
                 item.setdefault('created_at', datetime.utcnow().isoformat())
                 item.setdefault('updated_at', datetime.utcnow().isoformat())
             
-            result = self.client.table('shipments').upsert(
+            result = self.admin_client.table('shipments').upsert(
                 items,
                 on_conflict='equipment_name'
             ).execute()
@@ -504,6 +517,7 @@ class SupabaseManager:
     def insert_commissioning_record(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Insert a commissioning test record.
+        Uses service role key to bypass RLS policies.
         
         Args:
             data: Dict with test_id, system, test_name, result, etc.
@@ -518,7 +532,7 @@ class SupabaseManager:
         try:
             data.setdefault('created_at', datetime.utcnow().isoformat())
             
-            result = self.client.table('commissioning_records').insert(data).execute()
+            result = self.admin_client.table('commissioning_records').insert(data).execute()
             
             logger.info(f"Commissioning record inserted: {data.get('test_id')}")
             
@@ -665,7 +679,8 @@ class SupabaseManager:
         citations: List[str]
     ) -> Dict[str, Any]:
         """
-        Log an RFI question and answer.
+        Log an RFI question and answer to the database.
+        Uses service role key to bypass RLS policies.
         
         Args:
             question: RFI question
@@ -689,9 +704,9 @@ class SupabaseManager:
                 'created_at': datetime.utcnow().isoformat()
             }
             
-            result = self.client.table('rfi_log').insert(data).execute()
+            result = self.admin_client.table('rfi_log').insert(data).execute()
             
-            logger.info(f"RFI logged")
+            logger.info(f"RFI logged successfully")
             
             return {
                 'success': True,

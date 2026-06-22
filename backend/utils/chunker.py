@@ -43,51 +43,82 @@ def chunk_text_with_metadata(
         }
     """
     try:
+        logger.info(f"[CHUNK_TEXT] chunk_text_with_metadata() called: text_len={len(text) if text else 0}")
+        
         if not text or not isinstance(text, str):
-            logger.warning("Empty or non-string text provided to chunker")
+            logger.warning("[CHUNK_TEXT] Empty or non-string text provided to chunker")
             return []
 
         chunk_size = chunk_size or config.MAX_CHUNK_SIZE
         overlap = overlap or config.CHUNK_OVERLAP
+        
+        logger.info(f"[CHUNK_TEXT] chunk_size={chunk_size}, overlap={overlap}")
 
         if chunk_size <= 0 or overlap < 0 or overlap >= chunk_size:
-            logger.error(f"Invalid chunk parameters: size={chunk_size}, overlap={overlap}")
+            logger.error(f"[CHUNK_TEXT] Invalid chunk parameters: size={chunk_size}, overlap={overlap}")
             return []
 
         chunks = []
         chunk_index = 0
         char_start = 0
+        
+        logger.info(f"[CHUNK_TEXT] Starting chunking loop: text_length={len(text)}")
 
+        iteration_count = 0
         while char_start < len(text):
-            char_end = min(char_start + chunk_size, len(text))
-            chunk_text = text[char_start:char_end]
+            iteration_count += 1
+            
+            # Safety check: prevent infinite loops
+            if iteration_count > 10000:
+                logger.error(f"[CHUNK_TEXT] INFINITE LOOP DETECTED after {iteration_count} iterations! Breaking.")
+                break
+            
+            try:
+                char_end = min(char_start + chunk_size, len(text))
+                chunk_text = text[char_start:char_end]
+                
+                if iteration_count <= 3 or iteration_count % 100 == 0:
+                    logger.info(f"[CHUNK_TEXT] Iteration {iteration_count}: start={char_start}, end={char_end}, len={len(chunk_text)}")
 
-            # Skip very short chunks
-            if len(chunk_text) < 50:
+                # Skip very short chunks
+                if len(chunk_text) < 50:
+                    logger.info(f"[CHUNK_TEXT] Breaking at iteration {iteration_count}: chunk too short ({len(chunk_text)} < 50)")
+                    break
+
+                chunk_metadata = {
+                    **metadata,
+                    'chunk_index': chunk_index,
+                    'char_start': char_start,
+                    'char_end': char_end,
+                    'chunk_size': len(chunk_text)
+                }
+
+                chunks.append({
+                    'text': chunk_text,
+                    'metadata': chunk_metadata
+                })
+
+                # Move window with overlap
+                # FIX: Always move forward, never backward
+                new_char_start = char_end - overlap
+                if new_char_start <= char_start:
+                    # If overlap calculation moves backward, move forward by step instead
+                    new_char_start = char_start + (chunk_size - overlap)
+                
+                char_start = new_char_start
+                chunk_index += 1
+                
+            except Exception as loop_e:
+                logger.error(f"[CHUNK_TEXT] ERROR in loop iteration {iteration_count}: {str(loop_e)}")
+                logger.exception("[CHUNK_TEXT] Loop iteration exception")
                 break
 
-            chunk_metadata = {
-                **metadata,
-                'chunk_index': chunk_index,
-                'char_start': char_start,
-                'char_end': char_end,
-                'chunk_size': len(chunk_text)
-            }
-
-            chunks.append({
-                'text': chunk_text,
-                'metadata': chunk_metadata
-            })
-
-            # Move window with overlap
-            char_start = char_end - overlap
-            chunk_index += 1
-
-        logger.info(f"Created {len(chunks)} chunks from text (size={chunk_size}, overlap={overlap})")
+        logger.info(f"[CHUNK_TEXT] Completed {iteration_count} iterations. Created {len(chunks)} chunks from text (size={chunk_size}, overlap={overlap})")
         return chunks
 
     except Exception as e:
-        logger.error(f"Error chunking text: {str(e)}")
+        logger.error(f"[CHUNK_TEXT] Error chunking text: {str(e)}")
+        logger.exception("[CHUNK_TEXT] Text chunking exception")
         return []
 
 
@@ -114,12 +145,16 @@ def chunk_pdf_by_page(
         List of chunk dicts with page_number in metadata
     """
     try:
+        logger.info(f"[CHUNKER] chunk_pdf_by_page() called with {len(pages) if pages else 0} pages")
+        
         if not pages or not isinstance(pages, list):
-            logger.warning("Empty or invalid pages list provided")
+            logger.warning("[CHUNKER] Empty or invalid pages list provided")
             return []
 
         chunk_size = chunk_size or config.MAX_CHUNK_SIZE
         overlap = overlap or config.CHUNK_OVERLAP
+        
+        logger.info(f"[CHUNKER] Using chunk_size={chunk_size}, overlap={overlap}")
 
         all_chunks = []
         global_chunk_index = 0
@@ -129,8 +164,11 @@ def chunk_pdf_by_page(
                 page_num = page_info.get('page', 0)
                 page_text = page_info.get('text', '')
                 bbox = page_info.get('bbox')
+                
+                logger.debug(f"[CHUNKER] Processing page {page_num}: {len(page_text)} chars")
 
                 if not page_text or len(page_text) < 50:
+                    logger.debug(f"[CHUNKER] Skipping page {page_num} (text too short)")
                     continue
 
                 # Get chunks from this page
@@ -139,13 +177,15 @@ def chunk_pdf_by_page(
                     'page_number': page_num,
                     'bbox': bbox
                 }
-
+                
+                logger.debug(f"[CHUNKER] Calling chunk_text_with_metadata for page {page_num}")
                 page_chunks = chunk_text_with_metadata(
                     page_text,
                     page_metadata,
                     chunk_size,
                     overlap
                 )
+                logger.debug(f"[CHUNKER] Page {page_num}: created {len(page_chunks)} chunks")
 
                 # Reassign global chunk index
                 for chunk in page_chunks:
@@ -154,14 +194,16 @@ def chunk_pdf_by_page(
                     global_chunk_index += 1
 
             except Exception as e:
-                logger.warning(f"Error chunking page {page_info.get('page')}: {str(e)}")
+                logger.warning(f"[CHUNKER] Error chunking page {page_info.get('page')}: {str(e)}")
+                logger.exception("[CHUNKER] Page chunking exception")
                 continue
 
-        logger.info(f"Created {len(all_chunks)} chunks from {len(pages)} pages")
+        logger.info(f"[CHUNKER] Created {len(all_chunks)} chunks from {len(pages)} pages")
         return all_chunks
 
     except Exception as e:
-        logger.error(f"Error chunking PDF by page: {str(e)}")
+        logger.error(f"[CHUNKER] Error chunking PDF by page: {str(e)}")
+        logger.exception("[CHUNKER] PDF by page chunking exception")
         return []
 
 

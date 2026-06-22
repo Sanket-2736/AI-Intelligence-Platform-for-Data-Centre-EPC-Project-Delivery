@@ -3,37 +3,137 @@
 @tailwind utilities;
 
 /* Global Styles */
+* {
+  box-sizing: border-box;
+}
+
 :root {
-  --primary: #2563eb;
-  --secondary: #1e40af;
-  --success: #16a34a;
-  --warning: #ea580c;
-  --error: #dc2626;
+  --background: #0A0A0F;
+  --surface: #111118;
+  --sidebar: #0D0D14;
+  --accent: #6366F1;
+  --primary: #6366F1;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted: #475569;
+}
+
+html {
+  background-color: #0A0A0F;
 }
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  padding: 0;
+  background-color: #0A0A0F;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  color: #F1F5F9;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+  font-family: 'Monaco', 'Courier New', monospace;
 }
 
-/* Utility Classes */
+/* Premium Card Styling */
+.card {
+  @apply bg-[#111118] border border-white/[0.06] rounded-2xl shadow-xl shadow-black/20;
+}
+
+.card-p5 {
+  @apply p-5;
+}
+
+.card-p6 {
+  @apply p-6;
+}
+
+/* Premium Button Styles */
 .btn-primary {
-  @apply px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition;
+  @apply px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-colors font-medium text-sm;
 }
 
 .btn-secondary {
-  @apply px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition;
+  @apply px-4 py-2 bg-white/5 text-slate-200 rounded-lg hover:bg-white/10 transition-colors font-medium text-sm border border-white/10;
 }
 
-.card {
-  @apply p-6 bg-white rounded-lg shadow-md border border-gray-200;
+.btn-icon {
+  @apply p-2.5 rounded-xl transition-all duration-150 hover:bg-white/5;
 }
+
+/* Input Styling */
+.input-field {
+  @apply bg-[#1A1A24] border border-white/10 text-slate-200 rounded-lg px-3 py-2 text-sm placeholder-slate-600 focus:border-indigo-500 focus:outline-none transition-colors;
+}
+
+.textarea-field {
+  @apply bg-[#1A1A24] border border-white/10 text-slate-200 rounded-lg px-4 py-3 text-sm placeholder-slate-600 focus:border-indigo-500 focus:outline-none resize-none w-full transition-colors;
+}
+
+/* Badge Styles */
+.badge {
+  @apply inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-success {
+  @apply bg-emerald-500/10 text-emerald-400 border border-emerald-500/20;
+}
+
+.badge-warning {
+  @apply bg-amber-500/10 text-amber-400 border border-amber-500/20;
+}
+
+.badge-danger {
+  @apply bg-red-500/10 text-red-400 border border-red-500/20;
+}
+
+.badge-info {
+  @apply bg-indigo-500/10 text-indigo-400 border border-indigo-500/20;
+}
+
+/* Text Utilities */
+.text-primary {
+  @apply text-white font-semibold;
+}
+
+.text-secondary {
+  @apply text-slate-400;
+}
+
+.text-muted {
+  @apply text-slate-600;
+}
+
+/* Spacing & Layout */
+.section-title {
+  @apply text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3;
+}
+
+/* Transitions */
+.transition-smooth {
+  @apply transition-all duration-150;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 102, 241, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 102, 241, 0.5);
+}
+

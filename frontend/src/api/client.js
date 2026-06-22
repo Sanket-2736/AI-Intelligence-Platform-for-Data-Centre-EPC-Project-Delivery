@@ -14,7 +14,7 @@ const baseURL = import.meta.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 const client = axios.create({
   baseURL,
-  timeout: 30000,
+  timeout: 18000000,
   headers: {
     'Content-Type': 'application/json',
   },

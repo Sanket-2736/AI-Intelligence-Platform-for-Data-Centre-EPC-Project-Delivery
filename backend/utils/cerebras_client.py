@@ -86,8 +86,17 @@ class CerebrasClient:
                 
                 response_time_ms = (time.time() - start_time) * 1000
                 
-                # Extract response text
-                response_text = response.choices[0].message.content
+                # Extract response text - handle cases where content might be None
+                choice = response.choices[0]
+                response_text = choice.message.content
+                
+                # Fallback to reasoning field if content is None (can happen with token limits)
+                if response_text is None and hasattr(choice.message, 'reasoning'):
+                    response_text = choice.message.reasoning
+                
+                # Final fallback to empty string if both are None
+                if response_text is None:
+                    response_text = ""
                 
                 # Track usage
                 tokens_used = response.usage.total_tokens if hasattr(response, 'usage') else 0

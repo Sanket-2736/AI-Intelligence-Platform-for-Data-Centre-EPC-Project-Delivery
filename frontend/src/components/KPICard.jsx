@@ -1,51 +1,51 @@
 /**
- * KPI Card Component
+ * KPI Card Component (Premium Design)
  * 
- * Reusable card for displaying key performance indicators.
- * Includes trend indicator (up/down/neutral) and optional icon.
+ * Displays a key performance indicator with icon, value, title, and trend
  */
 
-import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
-export default function KPICard({
-  title,
-  value,
-  subtitle,
-  color = 'blue',
-  icon: Icon,
-  trend = null,
+export default function KPICard({ 
+  icon: Icon, 
+  value, 
+  title, 
+  trend = null, 
+  trendUp = true,
+  color = 'indigo',
+  className = '' 
 }) {
-  const colorClasses = {
-    red: 'bg-red-500/10 border-red-500/30 text-red-400',
-    orange: 'bg-orange-500/10 border-orange-500/30 text-orange-400',
-    green: 'bg-green-500/10 border-green-500/30 text-green-400',
-    blue: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
-    purple: 'bg-purple-500/10 border-purple-500/30 text-purple-400',
-  };
-
-  const getTrendIcon = () => {
-    if (!trend) return null;
-    if (trend === 'up') return <TrendingUp size={16} className="text-green-400" />;
-    if (trend === 'down') return <TrendingDown size={16} className="text-red-400" />;
-    return <Minus size={16} className="text-gray-400" />;
+  const colorMap = {
+    indigo: 'bg-indigo-500/10 text-indigo-400',
+    emerald: 'bg-emerald-500/10 text-emerald-400',
+    orange: 'bg-orange-500/10 text-orange-400',
+    red: 'bg-red-500/10 text-red-400',
+    purple: 'bg-purple-500/10 text-purple-400',
   };
 
   return (
-    <div className={`${colorClasses[color]} border rounded-xl p-6 backdrop-blur-sm`}>
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <p className="text-sm font-medium text-gray-400 mb-1">{title}</p>
-          <p className="text-3xl font-bold text-white">{value}</p>
-        </div>
-        {Icon && (
-          <Icon size={24} className="text-gray-500 opacity-50" />
-        )}
+    <div className={`bg-[#111118] border border-white/[0.06] rounded-2xl p-5 hover:border-white/10 transition-all ${className}`}>
+      <div className={`inline-flex p-2 rounded-xl ${colorMap[color]}`}>
+        <Icon size={20} />
+      </div>
+      
+      <div className="mt-3">
+        <div className="text-3xl font-bold text-white">{value}</div>
+        <div className="text-slate-400 text-sm font-medium mt-1">{title}</div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-gray-400">{subtitle}</p>
-        {getTrendIcon()}
-      </div>
+      {trend && (
+        <div className="mt-3 flex items-center gap-1">
+          {trendUp ? (
+            <TrendingUp size={14} className="text-emerald-400" />
+          ) : (
+            <TrendingDown size={14} className="text-red-400" />
+          )}
+          <span className={`text-xs font-medium ${trendUp ? 'text-emerald-400' : 'text-red-400'}`}>
+            {trend}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

@@ -117,14 +117,14 @@ export default function CommissioningAgent() {
   return (
     <div className="p-6 space-y-6 overflow-y-auto">
       {/* Tabs */}
-      <div className="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
-        <div className="flex border-b border-gray-700">
+      <div className="bg-[#111118] border border-white/[0.06] rounded-xl overflow-hidden">
+        <div className="flex border-b border-white/[0.06]">
           <button
             onClick={() => setActiveTab('procedures')}
             className={`flex-1 px-6 py-3 font-semibold transition-colors ${
               activeTab === 'procedures'
                 ? 'bg-yellow-600 text-white'
-                : 'text-gray-400 hover:text-white'
+                : 'text-slate-600 hover:text-white'
             }`}
           >
             Test Procedures
@@ -134,7 +134,7 @@ export default function CommissioningAgent() {
             className={`flex-1 px-6 py-3 font-semibold transition-colors ${
               activeTab === 'results'
                 ? 'bg-yellow-600 text-white'
-                : 'text-gray-400 hover:text-white'
+                : 'text-slate-600 hover:text-white'
             }`}
           >
             Log Results
@@ -144,7 +144,7 @@ export default function CommissioningAgent() {
             className={`flex-1 px-6 py-3 font-semibold transition-colors ${
               activeTab === 'itp'
                 ? 'bg-yellow-600 text-white'
-                : 'text-gray-400 hover:text-white'
+                : 'text-slate-600 hover:text-white'
             }`}
           >
             ITP Report
@@ -158,13 +158,13 @@ export default function CommissioningAgent() {
             <div className="space-y-6">
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-semibold text-gray-300 mb-2 block">
+                  <label className="text-sm font-semibold text-slate-300 mb-2 block">
                     System
                   </label>
                   <select
                     value={system}
                     onChange={(e) => setSystem(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                    className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-xl text-white"
                   >
                     <option>POWER</option>
                     <option>COOLING</option>
@@ -175,13 +175,13 @@ export default function CommissioningAgent() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-gray-300 mb-2 block">
+                  <label className="text-sm font-semibold text-slate-300 mb-2 block">
                     Tier
                   </label>
                   <select
                     value={tier}
                     onChange={(e) => setTier(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white"
+                    className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-xl text-white"
                   >
                     <option>Tier III</option>
                     <option>Tier IV</option>
@@ -189,7 +189,7 @@ export default function CommissioningAgent() {
                 </div>
 
                 <div>
-                  <label className="text-sm font-semibold text-gray-300 mb-2 block">
+                  <label className="text-sm font-semibold text-slate-300 mb-2 block">
                     Test Name
                   </label>
                   <input
@@ -197,7 +197,7 @@ export default function CommissioningAgent() {
                     value={testName}
                     onChange={(e) => setTestName(e.target.value)}
                     placeholder="e.g., UPS Load Test"
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400"
+                    className="w-full px-3 py-2 bg-gray-700 border border-white/10 rounded-xl text-white placeholder-gray-400"
                   />
                 </div>
               </div>
@@ -205,7 +205,7 @@ export default function CommissioningAgent() {
               <button
                 onClick={handleGenerateProcedure}
                 disabled={loading || !testName}
-                className="w-full px-6 py-3 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 rounded-lg text-white font-semibold flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-600 rounded-xl text-white font-semibold flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>
@@ -221,13 +221,13 @@ export default function CommissioningAgent() {
               </button>
 
               {procedure && (
-                <div className="bg-gray-700/50 rounded-lg p-6 space-y-6">
+                <div className="bg-gray-700/50 rounded-xl p-6 space-y-6">
                   {/* Header */}
                   <div>
                     <h3 className="text-lg font-bold">{procedure.test_name}</h3>
                     <div className="flex gap-2 mt-2">
                       <StatusBadge status={system} />
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-slate-600">
                         {procedure.estimated_duration_hours}h
                       </span>
                     </div>
@@ -235,7 +235,7 @@ export default function CommissioningAgent() {
 
                   {/* Safety Warnings */}
                   {procedure.safety_warnings && procedure.safety_warnings.length > 0 && (
-                    <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+                    <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
                       <p className="font-semibold text-red-400 mb-2">⚠️ Safety Warnings</p>
                       <ul className="text-sm text-red-300 space-y-1">
                         {procedure.safety_warnings.map((warning, idx) => (
@@ -253,12 +253,12 @@ export default function CommissioningAgent() {
                         {procedure.test_steps.map((step, idx) => (
                           <div
                             key={idx}
-                            className="bg-gray-800 border border-gray-600 rounded-lg p-3"
+                            className="bg-[#111118] border border-white/10 rounded-xl p-3"
                           >
                             <p className="font-semibold text-sm mb-2">
                               Step {step.step_num}: {step.action}
                             </p>
-                            <div className="text-xs text-gray-400 space-y-1">
+                            <div className="text-xs text-slate-600 space-y-1">
                               <p>
                                 <span className="font-semibold">Acceptance:</span>{' '}
                                 {step.acceptance_criteria}
@@ -277,7 +277,7 @@ export default function CommissioningAgent() {
 
                   {/* Acceptance Summary */}
                   {procedure.acceptance_summary && (
-                    <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4">
+                    <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
                       <p className="text-sm text-green-300">
                         <span className="font-semibold">Pass Criteria:</span>{' '}
                         {procedure.acceptance_summary}
@@ -297,12 +297,12 @@ export default function CommissioningAgent() {
                 {testLibrary.map((test) => (
                   <div
                     key={test.test_id}
-                    className="bg-gray-700/50 border border-gray-600 rounded-lg p-4"
+                    className="bg-gray-700/50 border border-white/10 rounded-xl p-4"
                   >
                     <p className="font-semibold text-sm mb-1">{test.test_name}</p>
                     <div className="flex items-center justify-between mb-3">
                       <StatusBadge status={test.system} />
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-slate-600">
                         {test.estimated_hours}h
                       </span>
                     </div>
@@ -340,7 +340,7 @@ export default function CommissioningAgent() {
                 <>
                   {/* Pass Rate Donut */}
                   <div className="grid grid-cols-2 gap-6">
-                    <div className="bg-gray-700/50 rounded-lg p-6 flex items-center justify-center">
+                    <div className="bg-gray-700/50 rounded-xl p-6 flex items-center justify-center">
                       <ResponsiveContainer width="100%" height={250}>
                         <PieChart>
                           <Pie
@@ -370,27 +370,27 @@ export default function CommissioningAgent() {
 
                     {/* Stats */}
                     <div className="space-y-2">
-                      <div className="bg-green-500/10 rounded-lg p-4">
-                        <p className="text-sm text-gray-400">Pass Rate</p>
+                      <div className="bg-green-500/10 rounded-xl p-4">
+                        <p className="text-sm text-slate-600">Pass Rate</p>
                         <p className="text-3xl font-bold text-green-400">
                           {dashboard.overall_pass_rate.toFixed(1)}%
                         </p>
                       </div>
-                      <div className="bg-gray-700/50 rounded-lg p-4 grid grid-cols-3 gap-2 text-center">
+                      <div className="bg-gray-700/50 rounded-xl p-4 grid grid-cols-3 gap-2 text-center">
                         <div>
-                          <p className="text-xs text-gray-400">Pass</p>
+                          <p className="text-xs text-slate-600">Pass</p>
                           <p className="text-xl font-bold text-green-400">
                             {dashboard.pass_count}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-400">Fail</p>
+                          <p className="text-xs text-slate-600">Fail</p>
                           <p className="text-xl font-bold text-red-400">
                             {dashboard.fail_count}
                           </p>
                         </div>
                         <div>
-                          <p className="text-xs text-gray-400">Cond</p>
+                          <p className="text-xs text-slate-600">Cond</p>
                           <p className="text-xl font-bold text-yellow-400">
                             {dashboard.conditional_count}
                           </p>
@@ -400,7 +400,7 @@ export default function CommissioningAgent() {
                   </div>
 
                   {/* System Breakdown */}
-                  <div className="bg-gray-700/50 rounded-lg p-6">
+                  <div className="bg-gray-700/50 rounded-xl p-6">
                     <h4 className="font-semibold mb-4">Results by System</h4>
                     <ResponsiveContainer width="100%" height={200}>
                       <BarChart
@@ -431,7 +431,7 @@ export default function CommissioningAgent() {
               <button
                 onClick={handleDownloadITP}
                 disabled={generatingPDF}
-                className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 rounded-lg text-white font-semibold flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-600 rounded-xl text-white font-semibold flex items-center justify-center gap-2"
               >
                 {generatingPDF ? (
                   <>
@@ -447,7 +447,7 @@ export default function CommissioningAgent() {
               </button>
 
               {lastGenerated && (
-                <p className="text-xs text-gray-400 text-center">
+                <p className="text-xs text-slate-600 text-center">
                   Last generated: {lastGenerated}
                 </p>
               )}
@@ -458,3 +458,4 @@ export default function CommissioningAgent() {
     </div>
   );
 }
+

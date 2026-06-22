@@ -99,7 +99,7 @@ export default function SupplyChainMap() {
   return (
     <div className="flex h-full gap-6 p-6">
       {/* LEFT - Leaflet Map */}
-      <div className="flex-1 relative bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+      <div className="flex-1 relative bg-[#111118] border border-white/[0.06] rounded-xl overflow-hidden">
         <MapContainer
           center={[51.505, -0.09]}
           zoom={4}
@@ -152,7 +152,7 @@ export default function SupplyChainMap() {
         {/* Upload Button Overlay */}
         <button
           onClick={() => setShowUploadModal(true)}
-          className="absolute top-4 right-4 z-10 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold flex items-center gap-2"
+          className="absolute top-4 right-4 z-10 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-xl text-white font-semibold flex items-center gap-2"
         >
           <Upload size={18} />
           Upload CSV
@@ -161,7 +161,7 @@ export default function SupplyChainMap() {
         {/* Upload Modal */}
         {showUploadModal && (
           <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-20 rounded-xl">
-            <div className="bg-gray-800 p-6 rounded-xl max-w-md">
+            <div className="bg-[#111118] p-6 rounded-xl max-w-md">
               <h3 className="text-lg font-bold mb-4">Upload Shipments CSV</h3>
               <FileUpload
                 accept=".csv"
@@ -170,7 +170,7 @@ export default function SupplyChainMap() {
               />
               <button
                 onClick={() => setShowUploadModal(false)}
-                className="mt-4 w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white"
+                className="mt-4 w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-xl text-white"
               >
                 Close
               </button>
@@ -180,7 +180,7 @@ export default function SupplyChainMap() {
       </div>
 
       {/* RIGHT - Alerts Panel */}
-      <div className="w-1/3 bg-gray-800 border border-gray-700 rounded-xl p-6 flex flex-col">
+      <div className="w-1/3 bg-[#111118] border border-white/[0.06] rounded-xl p-6 flex flex-col">
         <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
           <AlertCircle size={20} className="text-red-400" />
           At-Risk Deliveries
@@ -190,19 +190,19 @@ export default function SupplyChainMap() {
         {summary && (
           <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
             <div className="bg-gray-700/50 p-2 rounded">
-              <p className="text-gray-400">Total</p>
+              <p className="text-slate-600">Total</p>
               <p className="font-bold">{summary.total_shipments}</p>
             </div>
             <div className="bg-green-500/10 p-2 rounded">
-              <p className="text-gray-400">On Track</p>
+              <p className="text-slate-600">On Track</p>
               <p className="font-bold text-green-400">{summary.on_track}</p>
             </div>
             <div className="bg-orange-500/10 p-2 rounded">
-              <p className="text-gray-400">At Risk</p>
+              <p className="text-slate-600">At Risk</p>
               <p className="font-bold text-orange-400">{summary.at_risk}</p>
             </div>
             <div className="bg-red-500/10 p-2 rounded">
-              <p className="text-gray-400">Delayed</p>
+              <p className="text-slate-600">Delayed</p>
               <p className="font-bold text-red-400">{summary.critical}</p>
             </div>
           </div>
@@ -214,14 +214,14 @@ export default function SupplyChainMap() {
             alerts.map((alert, idx) => (
               <div
                 key={idx}
-                className="bg-gray-700/50 border border-gray-600 rounded-lg p-3"
+                className="bg-gray-700/50 border border-white/10 rounded-xl p-3"
               >
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <p className="font-semibold text-white">
                       {alert.equipment}
                     </p>
-                    <p className="text-xs text-gray-400">{alert.supplier}</p>
+                    <p className="text-xs text-slate-600">{alert.supplier}</p>
                   </div>
                   <div className="text-right">
                     <p
@@ -235,13 +235,13 @@ export default function SupplyChainMap() {
                     >
                       {alert.days_buffer}d
                     </p>
-                    <p className="text-xs text-gray-400">buffer</p>
+                    <p className="text-xs text-slate-600">buffer</p>
                   </div>
                 </div>
 
                 <StatusBadge status={alert.urgency_level} />
 
-                <p className="text-xs text-gray-300 mt-2">
+                <p className="text-xs text-slate-300 mt-2">
                   {alert.recommended_action}
                 </p>
 
@@ -249,14 +249,14 @@ export default function SupplyChainMap() {
                   onClick={() =>
                     handleGetAlternatives(alert.equipment, alert.supplier)
                   }
-                  className="mt-2 w-full px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs text-white font-semibold"
+                  className="mt-2 w-full px-3 py-1 bg-indigo-600 hover:bg-indigo-700 rounded text-xs text-white font-semibold"
                 >
                   Get Alternatives
                 </button>
               </div>
             ))
           ) : (
-            <p className="text-gray-500 text-center py-6">
+            <p className="text-slate-600 text-center py-6">
               No at-risk shipments 🎉
             </p>
           )}
@@ -265,7 +265,7 @@ export default function SupplyChainMap() {
         {/* Alternatives Modal */}
         {selectedAlternative && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-gray-800 p-6 rounded-xl max-w-md max-h-96 overflow-y-auto">
+            <div className="bg-[#111118] p-6 rounded-xl max-w-md max-h-96 overflow-y-auto">
               <h3 className="text-lg font-bold mb-4">Procurement Alternatives</h3>
 
               {selectedAlternative.alternatives && (
@@ -275,17 +275,17 @@ export default function SupplyChainMap() {
                       <p className="font-semibold text-sm">{alt.option}</p>
                       <div className="flex gap-4 mt-2 text-xs">
                         <div>
-                          <p className="text-gray-400">Lead Time</p>
+                          <p className="text-slate-600">Lead Time</p>
                           <p className="font-bold">
                             {alt.estimated_lead_time_weeks}w
                           </p>
                         </div>
                         <div>
-                          <p className="text-gray-400">Risk</p>
+                          <p className="text-slate-600">Risk</p>
                           <StatusBadge status={alt.risk_level} />
                         </div>
                       </div>
-                      <p className="text-xs text-gray-300 mt-2">
+                      <p className="text-xs text-slate-300 mt-2">
                         {alt.notes}
                       </p>
                     </div>
@@ -295,7 +295,7 @@ export default function SupplyChainMap() {
 
               <button
                 onClick={() => setSelectedAlternative(null)}
-                className="mt-4 w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-white"
+                className="mt-4 w-full px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-xl text-white"
               >
                 Close
               </button>
@@ -306,3 +306,4 @@ export default function SupplyChainMap() {
     </div>
   );
 }
+
