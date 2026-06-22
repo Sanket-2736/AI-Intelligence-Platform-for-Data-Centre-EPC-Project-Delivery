@@ -1,0 +1,51 @@
+services:
+  - type: web
+    name: epc-intelligence-api
+    runtime: python
+    region: oregon  # Change as needed
+    plan: free
+    
+    # Build configuration
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    
+    # Environment variables (values set in Render dashboard)
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      - key: DEBUG
+        value: false
+      - key: CEREBRAS_API_KEY
+        scope: secret
+      - key: SUPABASE_URL
+        scope: secret
+      - key: SUPABASE_ANON_KEY
+        scope: secret
+      - key: CHROMA_DB_PATH
+        value: /tmp/chroma_data
+      - key: EMBEDDING_MODEL
+        value: all-MiniLM-L6-v2
+      - key: MAX_CHUNK_SIZE
+        value: 1024
+      - key: CHUNK_OVERLAP
+        value: 128
+      - key: CEREBRAS_TIMEOUT_SECONDS
+        value: 30
+      - key: DB_TIMEOUT_SECONDS
+        value: 30
+    
+    # Health check
+    healthCheckPath: /health
+    healthCheckInterval: 30
+    healthCheckTimeout: 10
+    
+    # Auto-deploy on push
+    autoDeploy: true
+    
+    # Scaling
+    numInstances: 1
+    scaling:
+      minInstances: 1
+      maxInstances: 3

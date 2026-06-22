@@ -1,0 +1,48 @@
+# Backend
+backend/.env
+backend/.env.local
+backend/.env.production
+backend/__pycache__/
+backend/*.pyc
+backend/.pytest_cache/
+backend/.coverage
+backend/venv/
+backend/env/
+backend/ENV/
+backend/chroma_data/
+backend/build/
+backend/dist/
+backend/*.egg-info/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env.local
+frontend/.env.production
+frontend/.DS_Store
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+.env
+
+# Sample data (after generation)
+sample_data/*.xlsx
+sample_data/*.csv
+sample_data/schedule_*.xlsx
+sample_data/shipments.csv
