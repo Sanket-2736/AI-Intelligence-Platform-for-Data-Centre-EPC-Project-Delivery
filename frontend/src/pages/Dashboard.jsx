@@ -1,14 +1,3 @@
-/**
- * Dashboard Page - Command Centre (Premium Design)
- * 
- * KPI cards (2x3 grid) + charts (risk trend + NC breakdown) + recent activity feed
- * Fetches data from:
- * - GET /api/dashboard/summary (main dashboard stats)
- * - GET /api/schedule/trend (risk score time-series)
- * - GET /api/compliance/dashboard (NC breakdown)
- * - GET /api/rfi/history (recent RFIs)
- */
-
 import { useState, useEffect } from 'react';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
